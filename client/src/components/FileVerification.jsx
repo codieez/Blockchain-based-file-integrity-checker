@@ -70,6 +70,11 @@ function FileVerification() {
     return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
   };
 
+  const shortHash = (hash) => {
+    if (!hash) return 'N/A';
+    return `${hash.slice(0, 14)}...${hash.slice(-14)}`;
+  };
+
   return (
     <div className="space-y-8 max-w-3xl mx-auto fade-in">
       <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-300 via-purple-300 to-pink-300 bg-clip-text text-transparent mb-6">Verify File Integrity</h2>
@@ -92,6 +97,7 @@ function FileVerification() {
             <p className="text-gray-400 group-hover:text-gray-300 transition-colors duration-300">
               {file ? `${formatBytes(file.size)} • Ready to verify` : 'Drop your file here or click to browse'}
             </p>
+            <p className="text-xs text-gray-500 mt-2">Any file type can be verified by hash (SHA-256)</p>
           </div>
         </div>
         <input
@@ -133,6 +139,43 @@ function FileVerification() {
                 </div>
               </>
             )}
+          </div>
+
+          <div className="rounded-xl border border-slate-500/30 bg-slate-900/40 p-5 space-y-4">
+            <h4 className="text-sm font-bold uppercase tracking-wider text-gray-300">Integrity Check Flow</h4>
+            <div className="space-y-3 text-sm">
+              <div className="flex items-center justify-between">
+                <p className="text-gray-300">1. Generate hash from uploaded file bytes</p>
+                <span className="text-green-300 font-semibold">Done</span>
+              </div>
+              <div className="rounded-lg bg-slate-800/60 p-3 border border-slate-700/60">
+                <p className="text-gray-400 text-xs mb-1">Uploaded File Hash (SHA-256)</p>
+                <p className="font-mono text-cyan-300 break-all">{result.hashComparison?.uploadedHash || result.uploadedFile?.hash || 'N/A'}</p>
+                <p className="text-gray-500 text-xs mt-2">Short: {shortHash(result.hashComparison?.uploadedHash || result.uploadedFile?.hash)}</p>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <p className="text-gray-300">2. Lookup hash in reference database</p>
+                <span className={`font-semibold ${result.hashComparison?.foundInDatabase ? 'text-green-300' : 'text-red-300'}`}>
+                  {result.hashComparison?.foundInDatabase ? 'Found' : 'Not Found'}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <p className="text-gray-300">3. Compare uploaded hash with stored reference hash</p>
+                <span className={`font-semibold ${result.hashComparison?.match ? 'text-green-300' : 'text-red-300'}`}>
+                  {result.hashComparison?.match ? 'Match' : 'No Match'}
+                </span>
+              </div>
+
+              <div className="rounded-lg bg-slate-800/60 p-3 border border-slate-700/60">
+                <p className="text-gray-400 text-xs mb-1">Reference File Hash</p>
+                <p className="font-mono text-amber-300 break-all">{result.hashComparison?.originalHash || 'Not available (no matching file in database)'}</p>
+                {result.hashComparison?.originalHash && (
+                  <p className="text-gray-500 text-xs mt-2">Short: {shortHash(result.hashComparison.originalHash)}</p>
+                )}
+              </div>
+            </div>
           </div>
 
           {result.verified && result.originalFile && (

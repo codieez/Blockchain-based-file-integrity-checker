@@ -150,15 +150,34 @@ app.post('/api/verify-file', uploadVerify.single('file'), (req, res) => {
     const fileInfo = getFileInfo(req.file.path, req.file.originalname);
     const hash = fileInfo.fileHash;
 
-    // Check if original exists in database
+    // Check if matching reference file exists in database
     const original = db.findOriginal(hash);
+    const hashComparison = {
+      algorithm: 'SHA-256',
+      uploadedHash: hash,
+      originalHash: original ? original.fileHash : null,
+      match: !!original && original.fileHash === hash,
+      foundInDatabase: !!original
+    };
 
     if (!original) {
       return res.json({
         verified: false,
         message: 'File not found in registry. This file is not registered.',
-        uploadedHash: hash,
-        status: '✗ UNVERIFIED'
+        status: '✗ UNVERIFIED',
+        uploadedFile: {
+          filename: fileInfo.filename,
+          size: fileInfo.size,
+          mimeType: fileInfo.mimeType,
+          hash: hash
+        },
+        hashComparison,
+        verificationFlow: {
+          generatedHash: true,
+          lookedUpInDatabase: true,
+          comparedWithReference: false,
+          integrityVerified: false
+        }
       });
     }
 
@@ -176,13 +195,17 @@ app.post('/api/verify-file', uploadVerify.single('file'), (req, res) => {
         verificationCount: original.verified + 1
       },
       uploadedFile: {
+        size: fileInfo.size,
+        mimeType: fileInfo.mimeType,
         hash: hash,
         filename: fileInfo.filename
       },
-      hashComparison: {
-        originalHash: original.fileHash,
-        uploadedHash: hash,
-        match: original.fileHash === hash
+      hashComparison,
+      verificationFlow: {
+        generatedHash: true,
+        lookedUpInDatabase: true,
+        comparedWithReference: true,
+        integrityVerified: true
       }
     });
   } catch (error) {
@@ -193,19 +216,19 @@ app.post('/api/verify-file', uploadVerify.single('file'), (req, res) => {
 });
 
 // User: Get all available registered reference files
-app.get('/api/certificates', (req, res) => {
+app.get('/api/files/registered', (req, res) => {
   try {
     const files = db.getAllOriginals();
     res.json({
       success: true,
       count: files.length,
-      certificates: files.map(cert => ({
-        fileHash: cert.fileHash,
-        filename: cert.filename,
-        size: cert.size,
-        uploadedAt: cert.uploadedAt,
-        verifications: cert.verified,
-        integrity: cert.integrity
+      files: files.map(file => ({
+        fileHash: file.fileHash,
+        filename: file.filename,
+        size: file.size,
+        uploadedAt: file.uploadedAt,
+        verifications: file.verified,
+        integrity: file.integrity
       }))
     });
   } catch (error) {

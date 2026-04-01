@@ -129,6 +129,12 @@ function AdminUpload() {
       {uploadResult && (
         <div className="bg-slate-700/30 border border-green-500/30 rounded-lg p-6 space-y-3 hover:border-green-500/50 transition-colors">
           <h4 className="font-bold text-lg text-green-400">✓ Registered File Details</h4>
+          <div className="rounded-lg border border-slate-600/40 bg-slate-900/40 p-4 text-sm">
+            <p className="text-gray-300 font-semibold mb-2">How this was stored</p>
+            <p className="text-gray-400">1. SHA-256 hash was generated from uploaded file bytes</p>
+            <p className="text-gray-400">2. Hash was stored in the reference database</p>
+            <p className="text-gray-400">3. Hash was written to blockchain as a transaction</p>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             <div>
               <p className="text-gray-400 mb-1">Filename</p>

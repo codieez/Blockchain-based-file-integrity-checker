@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FaUpload, FaCheck, FaShieldAlt, FaLink, FaLock, FaUser, FaKeyboard } from 'react-icons/fa';
 import FileVerification from './components/FileVerification';
-import CertificateList from './components/CertificateList';
+import RegisteredFiles from './components/RegisteredFiles';
 import BlockchainView from './components/BlockchainView';
 import AdminUpload from './components/AdminUpload';
 import AdminDashboard from './components/AdminDashboard';
@@ -162,9 +162,9 @@ function App() {
               Verify File
             </button>
             <button
-              onClick={() => setActiveTab('certificates')}
+              onClick={() => setActiveTab('files')}
               className={`tab-button ${
-                activeTab === 'certificates' ? 'active' : 'inactive'
+                activeTab === 'files' ? 'active' : 'inactive'
               }`}
             >
               <FaLink className="text-lg" />
@@ -188,7 +188,7 @@ function App() {
           {!adminAuth && (
             <>
               {activeTab === 'verify' && <FileVerification />}
-              {activeTab === 'certificates' && <CertificateList />}
+              {activeTab === 'files' && <RegisteredFiles />}
               {activeTab === 'blockchain' && <BlockchainView />}
             </>
           )}
