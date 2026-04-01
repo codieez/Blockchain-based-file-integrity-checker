@@ -30,7 +30,7 @@ function FileList({ files, isLoading }) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-secondary"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-green-500 border-t-emerald-600"></div>
       </div>
     );
   }
@@ -49,18 +49,18 @@ function FileList({ files, isLoading }) {
       {files.map((file, index) => (
         <div
           key={file.fileHash}
-          className="border border-primary/20 rounded-lg overflow-hidden hover:border-primary/50 transition-colors"
+          className="border border-green-500/20 rounded-lg overflow-hidden hover:border-green-500/40 transition-all hover:shadow-lg hover:shadow-green-500/10"
         >
           <button
             onClick={() => toggleExpand(index)}
-            className="w-full px-4 py-3 sm:px-6 sm:py-4 flex items-center justify-between bg-dark/50 hover:bg-dark/70 transition-colors"
+            className="w-full px-4 py-3 sm:px-6 sm:py-4 flex items-center justify-between bg-slate-800/40 hover:bg-slate-800/60 transition-colors"
           >
             <div className="flex items-center gap-3 flex-1 text-left">
-              <div className={`p-2 rounded-lg ${file.verified ? 'bg-success/20' : 'bg-danger/20'}`}>
+              <div className={`p-2 rounded-lg ${file.verified ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
                 {file.verified ? (
-                  <FaCheckCircle className="text-success text-lg" />
+                  <FaCheckCircle className="text-green-400 text-lg" />
                 ) : (
-                  <FaTimesCircle className="text-danger text-lg" />
+                  <FaTimesCircle className="text-red-400 text-lg" />
                 )}
               </div>
               <div className="flex-1 min-w-0">
@@ -76,17 +76,17 @@ function FileList({ files, isLoading }) {
           </button>
 
           {expandedIndex === index && (
-            <div className="bg-dark/30 border-t border-primary/20 px-4 py-4 sm:px-6 space-y-4">
+            <div className="bg-slate-800/20 border-t border-green-500/20 px-4 py-4 sm:px-6 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                 <div>
                   <p className="text-gray-400 mb-1">Status</p>
-                  <p className={`font-semibold ${file.verified ? 'text-success' : 'text-danger'}`}>
-                    {file.verified ? 'Verified' : 'Unverified'}
+                  <p className={`font-semibold ${file.verified ? 'text-green-400' : 'text-red-400'}`}>
+                    {file.verified ? '✓ Verified' : '✗ Unverified'}
                   </p>
                 </div>
                 <div>
                   <p className="text-gray-400 mb-1">Block Index</p>
-                  <p className="text-primary font-mono">{file.blockIndex}</p>
+                  <p className="text-green-400 font-mono font-bold">#{file.blockIndex}</p>
                 </div>
                 <div className="sm:col-span-2">
                   <p className="text-gray-400 mb-1">Uploaded</p>
@@ -96,17 +96,17 @@ function FileList({ files, isLoading }) {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <p className="text-gray-400 mb-1">File Hash (SHA-256)</p>
-                      <p className="text-xs font-mono text-secondary break-all">
+                      <p className="text-xs font-mono text-gray-300 break-all bg-slate-800/50 rounded p-2 border border-green-500/20">
                         {file.fileHash}
                       </p>
                     </div>
                     <button
                       onClick={() => copyToClipboard(file.fileHash, file.fileHash)}
-                      className="ml-2 p-2 hover:bg-primary/20 rounded transition-colors"
+                      className="ml-2 p-2 hover:bg-green-500/20 rounded transition-colors"
                       title="Copy hash"
                     >
                       <FaCopy className={`text-sm ${
-                        copiedHash === file.fileHash ? 'text-success' : 'text-gray-400'
+                        copiedHash === file.fileHash ? 'text-green-400' : 'text-gray-400'
                       }`} />
                     </button>
                   </div>
@@ -115,17 +115,17 @@ function FileList({ files, isLoading }) {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <p className="text-gray-400 mb-1">Block Hash</p>
-                      <p className="text-xs font-mono text-secondary break-all">
+                      <p className="text-xs font-mono text-gray-300 break-all bg-slate-800/50 rounded p-2 border border-green-500/20">
                         {file.blockHash}
                       </p>
                     </div>
                     <button
                       onClick={() => copyToClipboard(file.blockHash, file.blockHash)}
-                      className="ml-2 p-2 hover:bg-primary/20 rounded transition-colors"
+                      className="ml-2 p-2 hover:bg-green-500/20 rounded transition-colors"
                       title="Copy block hash"
                     >
                       <FaCopy className={`text-sm ${
-                        copiedHash === file.blockHash ? 'text-success' : 'text-gray-400'
+                        copiedHash === file.blockHash ? 'text-green-400' : 'text-gray-400'
                       }`} />
                     </button>
                   </div>

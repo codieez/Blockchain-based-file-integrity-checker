@@ -37,7 +37,7 @@ function BlockchainView() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-secondary"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-green-500 border-t-emerald-600"></div>
       </div>
     );
   }
@@ -61,46 +61,46 @@ function BlockchainView() {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-        <div className="bg-dark/50 border border-primary/20 rounded-lg p-4">
+        <div className="bg-slate-800/40 border border-green-500/20 rounded-lg p-4 hover:border-green-500/40 transition-colors">
           <p className="text-gray-400 text-xs mb-1 flex items-center gap-1">
-            <FaCube className="text-primary" /> Total Blocks
+            <FaCube className="text-green-400" /> Total Blocks
           </p>
-          <p className="text-2xl font-bold text-primary">{blockchain.stats.totalBlocks}</p>
+          <p className="text-2xl font-bold text-green-400">{blockchain.stats.totalBlocks}</p>
         </div>
-        <div className="bg-dark/50 border border-primary/20 rounded-lg p-4">
+        <div className="bg-slate-800/40 border border-green-500/20 rounded-lg p-4 hover:border-green-500/40 transition-colors">
           <p className="text-gray-400 text-xs mb-1 flex items-center gap-1">
-            <FaLink className="text-secondary" /> Total Files
+            <FaLink className="text-emerald-400" /> Total Files
           </p>
-          <p className="text-2xl font-bold text-secondary">{blockchain.stats.totalFiles}</p>
+          <p className="text-2xl font-bold text-emerald-400">{blockchain.stats.totalFiles}</p>
         </div>
-        <div className="bg-dark/50 border border-primary/20 rounded-lg p-4">
+        <div className="bg-slate-800/40 border border-green-500/20 rounded-lg p-4 hover:border-green-500/40 transition-colors">
           <p className="text-gray-400 text-xs mb-1 flex items-center gap-1">
-            <FaTachometerAlt className="text-amber-400" /> Current Difficulty
+            <FaTachometerAlt className="text-yellow-400" /> Current Difficulty
           </p>
-          <p className="text-2xl font-bold text-amber-400">{blockchain.stats.currentDifficulty}</p>
+          <p className="text-2xl font-bold text-yellow-400">{blockchain.stats.currentDifficulty}</p>
         </div>
-        <div className="bg-dark/50 border border-primary/20 rounded-lg p-4">
+        <div className="bg-slate-800/40 border border-green-500/20 rounded-lg p-4 hover:border-green-500/40 transition-colors">
           <p className="text-gray-400 text-xs mb-1 flex items-center gap-1">
-            <FaClock className="text-blue-400" /> Avg Mine Time
+            <FaClock className="text-cyan-400" /> Avg Mine Time
           </p>
-          <p className="text-2xl font-bold text-blue-400">{blockchain.stats.averageMiningTime}ms</p>
+          <p className="text-2xl font-bold text-cyan-400">{blockchain.stats.averageMiningTime}ms</p>
         </div>
         <div className={`rounded-lg p-4 border ${
           blockchain.stats.isValid
-            ? 'bg-success/10 border-success/50'
-            : 'bg-danger/10 border-danger/50'
-        }`}>
+            ? 'bg-green-500/10 border-green-500/50 hover:border-green-500/70'
+            : 'bg-red-500/10 border-red-500/50 hover:border-red-500/70'
+        } transition-colors`}>
           <p className="text-gray-400 text-xs mb-1">Chain Status</p>
           <div className="flex items-center gap-1">
             {blockchain.stats.isValid ? (
               <>
-                <FaCheckCircle className="text-success text-lg" />
-                <p className="text-sm font-bold text-success">Valid</p>
+                <FaCheckCircle className="text-green-400 text-lg" />
+                <p className="text-sm font-bold text-green-400">✓ Valid</p>
               </>
             ) : (
-              <> ({blockchain.chain.length})
-                <FaTimesCircle className="text-danger text-lg" />
-                <p className="text-sm font-bold text-danger">Invalid</p>
+              <>
+                <FaTimesCircle className="text-red-400 text-lg" />
+                <p className="text-sm font-bold text-red-400">✗ Invalid ({blockchain.chain.length})</p>
               </>
             )}
           </div>
@@ -118,8 +118,8 @@ function BlockchainView() {
             onClick={() => setActiveTab(tab.id)}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
               activeTab === tab.id
-                ? 'bg-gradient-to-r from-primary to-secondary text-white'
-                : 'bg-dark/50 border border-primary/20 text-gray-300 hover:border-primary/40'
+                ? 'bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg shadow-green-500/30'
+                : 'bg-slate-800/40 border border-green-500/20 text-gray-300 hover:border-green-500/40'
             }`}
           >
             {tab.icon} {tab.label}
@@ -130,8 +130,8 @@ function BlockchainView() {
       {activeTab === 'blocks' && (
 
       <div className="space-y-3">
-        <h3 className="text-lg font-bold flex items-center gap-2">
-          <FaCube className="text-primary" />
+        <h3 className="text-lg font-bold flex items-center gap-2 text-white">
+          <FaCube className="text-green-400" />
           Blockchain Blocks
         </h3>
 
@@ -139,15 +139,15 @@ function BlockchainView() {
           {blockchain.chain.map((block, index) => (
             <div
               key={block.hash}
-              className="border border-primary/20 rounded-lg overflow-hidden hover:border-primary/50 transition-colors"
+              className="border border-green-500/20 rounded-lg overflow-hidden hover:border-green-500/40 transition-all hover:shadow-lg hover:shadow-green-500/10"
             >
               <button
                 onClick={() => setExpandedIndex(expandedIndex === index ? null : index)}
-                className="w-full px-4 py-3 flex items-center justify-between bg-dark/50 hover:bg-dark/70 transition-colors"
+                className="w-full px-4 py-3 flex items-center justify-between bg-slate-800/40 hover:bg-slate-800/60 transition-colors"
               >
                 <div className="flex items-center gap-3 text-left flex-1">
                   <div className={`flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg ${
-                    block.isValid ? 'bg-success/20 text-success' : 'bg-danger/20 text-danger'
+                    block.isValid ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
                   }`}>
                     <p className="text-xs font-bold">{block.index}</p>
                   </div>
@@ -164,7 +164,7 @@ function BlockchainView() {
               </button>
 
               {expandedIndex === index && (
-                <div className="bg-dark/30 border-t border-primary/20 px-4 py-4 text-xs space-y-3">
+                <div className="bg-slate-800/20 border-t border-green-500/20 px-4 py-4 text-xs space-y-3">
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <p className="text-gray-400 mb-1">Timestamp</p>
@@ -180,7 +180,7 @@ function BlockchainView() {
                     </div>
                     <div>
                       <p className="text-gray-400 mb-1">Status</p>
-                      <p className={block.isValid ? 'text-success' : 'text-danger'}>
+                      <p className={block.isValid ? 'text-green-400 font-bold' : 'text-red-400 font-bold'}>
                         {block.isValid ? '✓ Valid' : '✗ Invalid'}
                       </p>
                     </div>
@@ -188,21 +188,21 @@ function BlockchainView() {
 
                   <div>
                     <p className="text-gray-400 mb-1">Block Hash</p>
-                    <p className="font-mono text-xs text-secondary break-all">{block.hash}</p>
+                    <p className="font-mono text-xs text-gray-300 break-all bg-slate-800/50 rounded p-2 border border-green-500/20">{block.hash}</p>
                   </div>
 
                   <div>
                     <p className="text-gray-400 mb-1">Previous Hash</p>
-                    <p className="font-mono text-xs text-secondary break-all">{block.previousHash}</p>
+                    <p className="font-mono text-xs text-gray-300 break-all bg-slate-800/50 rounded p-2 border border-green-500/20">{block.previousHash}</p>
                   </div>
 
                   <div>
                     <p className="text-gray-400 mb-1">Merkle Root</p>
-                    <p className="font-mono text-xs text-secondary break-all">{block.merkleRoot}</p>
+                    <p className="font-mono text-xs text-gray-300 break-all bg-slate-800/50 rounded p-2 border border-green-500/20">{block.merkleRoot}</p>
                   </div>
 
                   {block.index > 0 && (
-                    <div className="pt-2 border-t border-primary/20">
+                    <div className="pt-2 border-t border-green-500/20">
                       <p className="text-gray-400 mb-2">Transactions ({block.transactionCount})</p>
                       <div className="space-y-1">
                         {Array.from({length: Math.min(block.transactionCount, 3)}).map((_, i) => (
@@ -224,28 +224,28 @@ function BlockchainView() {
 
       {activeTab === 'mining' && miningStats && (
         <div className="space-y-4">
-          <h3 className="text-lg font-bold flex items-center gap-2">
-            <FaBolt className="text-secondary" />
+          <h3 className="text-lg font-bold flex items-center gap-2 text-white">
+            <FaBolt className="text-emerald-400" />
             Mining Statistics
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="bg-dark/50 border border-primary/20 rounded-lg p-4">
+            <div className="bg-slate-800/40 border border-green-500/20 rounded-lg p-4 hover:border-green-500/40 transition-colors">
               <p className="text-gray-400 text-sm mb-2">Total Blocks Mined</p>
-              <p className="text-3xl font-bold text-primary">{miningStats.totalBlocksMined}</p>
+              <p className="text-3xl font-bold text-green-400">{miningStats.totalBlocksMined}</p>
             </div>
-            <div className="bg-dark/50 border border-primary/20 rounded-lg p-4">
+            <div className="bg-slate-800/40 border border-green-500/20 rounded-lg p-4 hover:border-green-500/40 transition-colors">
               <p className="text-gray-400 text-sm mb-2">Avg Mining Time</p>
-              <p className="text-3xl font-bold text-blue-400">{miningStats.averageMiningTime}ms</p>
+              <p className="text-3xl font-bold text-cyan-400">{miningStats.averageMiningTime}ms</p>
             </div>
-            <div className="bg-dark/50 border border-primary/20 rounded-lg p-4">
+            <div className="bg-slate-800/40 border border-green-500/20 rounded-lg p-4 hover:border-green-500/40 transition-colors">
               <p className="text-gray-400 text-sm mb-2">Total Iterations</p>
-              <p className="text-3xl font-bold text-amber-400">{miningStats.totalIterations.toLocaleString()}</p>
+              <p className="text-3xl font-bold text-yellow-400">{miningStats.totalIterations.toLocaleString()}</p>
             </div>
           </div>
 
-          <div className="bg-dark/50 border border-primary/20 rounded-lg p-4">
-            <h4 className="font-bold mb-3">Difficulty History</h4>
+          <div className="bg-slate-800/40 border border-green-500/20 rounded-lg p-4 hover:border-green-500/40 transition-colors">
+            <h4 className="font-bold mb-3 text-white">Difficulty History</h4>
             <div className="space-y-2 max-h-[400px] overflow-y-auto">
               {miningStats.difficultyHistory.slice().reverse().map((entry, i) => (
                 <div key={i} className="flex items-center justify-between text-sm p-2 bg-dark/50 rounded">
@@ -264,11 +264,11 @@ function BlockchainView() {
       {activeTab === 'mempool' && mempool && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-bold flex items-center gap-2">
-              <FaCube className="text-secondary" />
+            <h3 className="text-lg font-bold flex items-center gap-2 text-white">
+              <FaCube className="text-emerald-400" />
               Memory Pool
             </h3>
-            <span className="text-2xl font-bold text-primary">{mempool.mempoolSize}</span>
+            <span className="text-2xl font-bold text-green-400 bg-green-500/10 px-3 py-1 rounded-lg border border-green-500/30">{mempool.mempoolSize}</span>
           </div>
 
           {mempool.mempoolSize === 0 ? (
@@ -278,9 +278,9 @@ function BlockchainView() {
           ) : (
             <div className="space-y-2 max-h-[400px] overflow-y-auto">
               {mempool.transactions.map((tx, idx) => (
-                <div key={tx.id} className="bg-dark/50 border border-primary/20 rounded-lg p-3">
+                <div key={tx.id} className="bg-slate-800/40 border border-green-500/20 rounded-lg p-3 hover:border-green-500/40 transition-colors">
                   <div className="flex items-start justify-between mb-2">
-                    <span className="text-xs font-mono text-gray-400">TX #{idx + 1}</span>
+                    <span className="text-xs font-mono text-green-400 font-bold">TX #{idx + 1}</span>
                     <span className="text-xs text-gray-500">{formatDate(tx.timestamp)}</span>
                   </div>
                   <p className="text-xs text-gray-300 font-mono break-all">{tx.filename}</p>

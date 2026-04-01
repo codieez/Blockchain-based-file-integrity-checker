@@ -6,12 +6,12 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: '#6366f1',
-        secondary: '#8b5cf6',
-        success: '#10b981',
+        primary: '#10b981',
+        secondary: '#059669',
+        success: '#34d399',
         danger: '#ef4444',
         dark: '#1f2937',
-        darker: '#111827'
+        darker: '#0f172a'
       },
       animation: {
         pulse: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',

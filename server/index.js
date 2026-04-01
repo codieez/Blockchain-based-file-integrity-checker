@@ -33,6 +33,10 @@ const upload = multer({
 app.use(cors());
 app.use(express.json());
 
+// Serve static files from the client build directory
+const clientDistPath = path.join(__dirname, '../client/dist');
+app.use(express.static(clientDistPath));
+
 const fileRegistry = new Map();
 
 app.post('/api/upload', upload.single('file'), (req, res) => {
@@ -99,7 +103,7 @@ app.post('/api/verify', express.json(), (req, res) => {
     }
 
     const registered = fileRegistry.get(fileHash);
-    const verificatonResult = blockchain.verifyBlockchain(result.blockIndex, 10);
+    const verificationResult = blockchain.verifyBlockchain(result.blockIndex, 10);
 
     res.json({
       verified: true,
@@ -109,7 +113,7 @@ app.post('/api/verify', express.json(), (req, res) => {
         blockHash: result.blockHash,
         blockValid: blockchain.chain[result.blockIndex].isValid(),
         chainIntegrity: blockchain.isChainValid(),
-        verificationPath: verificatonResult,
+        verificationPath: verificationResult,
         ...registered
       }
     });
@@ -329,6 +333,11 @@ app.get('/api/transaction/:hash', (req, res) => {
     console.error('Transaction lookup error:', error);
     res.status(500).json({ error: 'Transaction lookup failed' });
   }
+});
+
+// Serve index.html for all non-API routes (SPA routing)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(clientDistPath, 'index.html'));
 });
 
 const PORT = process.env.PORT || 5000;

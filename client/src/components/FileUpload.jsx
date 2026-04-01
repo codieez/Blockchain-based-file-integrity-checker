@@ -81,15 +81,15 @@ function FileUpload({ onUploaded }) {
       <div
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        className="relative border-2 border-dashed border-primary/40 rounded-xl p-8 sm:p-12 text-center hover:border-primary/80 transition-colors duration-300 cursor-pointer bg-primary/5"
+        className="relative border-2 border-dashed border-green-500/40 rounded-xl p-8 sm:p-12 text-center hover:border-green-500/80 transition-all duration-300 cursor-pointer bg-green-500/5 hover:bg-green-500/10"
         onClick={() => fileInputRef.current?.click()}
       >
         <div className="space-y-4">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-primary to-secondary">
-            <FaCloudUploadAlt className="text-3xl" />
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 shadow-lg shadow-green-500/30">
+            <FaCloudUploadAlt className="text-3xl text-white" />
           </div>
           <div>
-            <h3 className="text-xl font-bold mb-2">
+            <h3 className="text-xl font-bold mb-2 text-white">
               {file ? file.name : 'Drop your file here'}
             </h3>
             <p className="text-gray-400">
@@ -106,45 +106,45 @@ function FileUpload({ onUploaded }) {
       </div>
 
       {status && (
-        <div className={`flex items-center gap-3 p-4 rounded-lg ${
+        <div className={`flex items-center gap-3 p-4 rounded-lg border ${
           status.type === 'success'
-            ? 'bg-success/10 border border-success/50'
-            : 'bg-danger/10 border border-danger/50'
+            ? 'bg-green-500/10 border-green-500/50'
+            : 'bg-red-500/10 border-red-500/50'
         }`}>
           {status.type === 'success' ? (
-            <FaCheckCircle className="text-success text-xl" />
+            <FaCheckCircle className={`text-xl ${status.type === 'success' ? 'text-green-400' : 'text-red-400'}`} />
           ) : (
-            <FaExclamationCircle className="text-danger text-xl" />
+            <FaExclamationCircle className={`text-xl ${status.type === 'success' ? 'text-green-400' : 'text-red-400'}`} />
           )}
-          <p className={status.type === 'success' ? 'text-success' : 'text-danger'}>
+          <p className={status.type === 'success' ? 'text-green-400' : 'text-red-400'}>
             {status.message}
           </p>
         </div>
       )}
 
       {uploadResult && (
-        <div className="bg-dark/50 border border-primary/30 rounded-lg p-6 space-y-3">
-          <h4 className="font-bold text-lg text-primary">Upload Details</h4>
+        <div className="bg-slate-700/30 border border-green-500/30 rounded-lg p-6 space-y-3 hover:border-green-500/50 transition-colors">
+          <h4 className="font-bold text-lg text-green-400">✓ Upload Details</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             <div>
-              <p className="text-gray-400">Filename</p>
-              <p className="font-mono text-primary break-all">{uploadResult.filename}</p>
+              <p className="text-gray-400 mb-1">Filename</p>
+              <p className="font-mono text-green-400 break-all">{uploadResult.filename}</p>
             </div>
             <div>
-              <p className="text-gray-400">File Size</p>
-              <p className="font-mono text-primary">{formatBytes(uploadResult.size)}</p>
+              <p className="text-gray-400 mb-1">File Size</p>
+              <p className="font-mono text-emerald-400">{formatBytes(uploadResult.size)}</p>
             </div>
             <div className="sm:col-span-2">
-              <p className="text-gray-400">File Hash</p>
-              <p className="font-mono text-xs text-secondary break-all">{uploadResult.fileHash}</p>
+              <p className="text-gray-400 mb-1">File Hash (SHA-256)</p>
+              <p className="font-mono text-xs text-gray-300 break-all bg-slate-800/50 rounded p-2 border border-green-500/20">{uploadResult.fileHash}</p>
             </div>
             <div>
-              <p className="text-gray-400">Block Index</p>
-              <p className="font-mono text-primary">{uploadResult.blockIndex}</p>
+              <p className="text-gray-400 mb-1">Block Index</p>
+              <p className="font-mono text-emerald-400 font-bold text-lg">#{uploadResult.blockIndex}</p>
             </div>
             <div>
-              <p className="text-gray-400">Block Hash</p>
-              <p className="font-mono text-xs text-secondary break-all">{uploadResult.blockHash.substring(0, 32)}...</p>
+              <p className="text-gray-400 mb-1">Block Hash</p>
+              <p className="font-mono text-xs text-gray-300 break-all bg-slate-800/50 rounded p-2 border border-green-500/20">{uploadResult.blockHash.substring(0, 32)}...</p>
             </div>
           </div>
         </div>
@@ -153,12 +153,13 @@ function FileUpload({ onUploaded }) {
       <button
         onClick={handleUpload}
         disabled={!file || uploading}
-        className={`w-full py-3 px-6 rounded-lg font-bold transition-all duration-300 ${
+        className={`w-full py-3 px-6 rounded-lg font-bold flex items-center justify-center gap-2 transition-all duration-300 ${
           !file || uploading
             ? 'bg-gray-600 cursor-not-allowed opacity-50'
-            : 'bg-gradient-to-r from-primary to-secondary hover:shadow-lg hover:shadow-primary/50'
+            : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl hover:shadow-green-500/50 active:scale-95'
         }`}
       >
+        <FaCloudUploadAlt className="text-lg" />
         {uploading ? 'Uploading...' : 'Upload File'}
       </button>
     </div>
