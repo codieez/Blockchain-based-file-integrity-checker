@@ -1,0 +1,26 @@
+{
+  "92d29b3cae7208268d9cebf11c4944490df32e26115e8680a76afaf21094bf10": {
+    "fileHash": "92d29b3cae7208268d9cebf11c4944490df32e26115e8680a76afaf21094bf10",
+    "filename": "README.md",
+    "size": 2522,
+    "uploadedAt": "2026-04-01T06:59:14.593Z",
+    "verified": 0,
+    "integrity": "✓ Valid"
+  },
+  "c0b1d92bea9c43172abf099d299c3b06e336180336dab208df84c7609d6df9f4": {
+    "fileHash": "c0b1d92bea9c43172abf099d299c3b06e336180336dab208df84c7609d6df9f4",
+    "filename": "test-cert.txt",
+    "size": 18,
+    "uploadedAt": "2026-04-01T07:00:40.628Z",
+    "verified": 0,
+    "integrity": "✓ Valid"
+  },
+  "e3c155280788cadca60b63442630bd9c5333fac251eaf679bdc342471495fa0d": {
+    "fileHash": "e3c155280788cadca60b63442630bd9c5333fac251eaf679bdc342471495fa0d",
+    "filename": "Screenshot 2025-05-30 144830.png",
+    "size": 436545,
+    "uploadedAt": "2026-04-01T07:01:25.708Z",
+    "verified": 1,
+    "integrity": "✓ Valid"
+  }
+}

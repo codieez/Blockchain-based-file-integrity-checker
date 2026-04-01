@@ -5,6 +5,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { Blockchain } from './blockchain.js';
 import { calculateFileHash, getFileInfo, cleanupFile, verifyFileChain } from './fileHandler.js';
+import { Database } from './database.js';
 import { v4 as uuidv4 } from 'uuid';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -12,22 +13,36 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 const blockchain = new Blockchain(2);
+const db = new Database();
 
-const storage = multer.diskStorage({
+// Storage for original files (admin uploads)
+const originalStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '../uploads'));
+    cb(null, path.join(__dirname, '../data/originals'));
   },
   filename: (req, file, cb) => {
     cb(null, `${uuidv4()}-${Date.now()}${path.extname(file.originalname)}`);
   }
 });
 
-const upload = multer({
-  storage,
-  limits: { fileSize: 100 * 1024 * 1024 },
-  fileFilter: (req, file, cb) => {
-    cb(null, true);
+// Storage for user verification files
+const verifyStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, '../data/verify'));
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${uuidv4()}-${Date.now()}${path.extname(file.originalname)}`);
   }
+});
+
+const uploadOriginal = multer({
+  storage: originalStorage,
+  limits: { fileSize: 100 * 1024 * 1024 }
+});
+
+const uploadVerify = multer({
+  storage: verifyStorage,
+  limits: { fileSize: 100 * 1024 * 1024 }
 });
 
 app.use(cors());
@@ -37,91 +52,169 @@ app.use(express.json());
 const clientDistPath = path.join(__dirname, '../client/dist');
 app.use(express.static(clientDistPath));
 
+// Simple authentication middleware for admin (in production, use proper JWT)
+const adminAuth = (req, res, next) => {
+  const adminKey = req.headers['x-admin-key'] || req.query.adminKey;
+  if (adminKey === 'admin123') {
+    next();
+  } else {
+    res.status(401).json({ error: 'Unauthorized: Invalid admin key' });
+  }
+};
+
 const fileRegistry = new Map();
 
-app.post('/api/upload', upload.single('file'), (req, res) => {
+// ===================== ADMIN ENDPOINTS =====================
+
+// Admin: Upload original certificate file
+app.post('/api/admin/upload-original', adminAuth, uploadOriginal.single('file'), (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
     const fileInfo = getFileInfo(req.file.path, req.file.originalname);
-    const registryId = uuidv4();
-
-    blockchain.addTransactionToMempool(
+    
+    // Add to database
+    const originalFile = db.addOriginal(
       fileInfo.fileHash,
       fileInfo.filename,
-      fileInfo.size
+      fileInfo.size,
+      fileInfo.uploadedAt
     );
 
-    const block = blockchain.mineBlock('User');
-
-    fileRegistry.set(fileInfo.fileHash, {
-      fileInfo,
-      blockIndex: block.index,
-      blockHash: block.hash,
-      registryId,
-      transactionId: block.transactions.find(tx => tx.fileHash === fileInfo.fileHash).id
-    });
+    // Add to blockchain
+    blockchain.addTransactionToMempool(fileInfo.fileHash, fileInfo.filename, fileInfo.size);
+    const block = blockchain.mineBlock('Admin');
 
     res.json({
       success: true,
+      message: 'Original certificate uploaded and stored',
       data: {
-        fileHash: fileInfo.fileHash,
-        filename: fileInfo.filename,
-        size: fileInfo.size,
-        uploadedAt: fileInfo.uploadedAt,
+        ...originalFile,
         blockIndex: block.index,
-        blockHash: block.hash,
-        registryId,
-        miningStats: block.miningStats,
-        transactionId: block.transactions.find(tx => tx.fileHash === fileInfo.fileHash).id
+        blockHash: block.hash
       }
     });
   } catch (error) {
-    console.error('Upload error:', error);
+    console.error('Admin upload error:', error);
     if (req.file) cleanupFile(req.file.path);
     res.status(500).json({ error: 'Upload failed' });
   }
 });
 
-app.post('/api/verify', express.json(), (req, res) => {
+// Admin: Get all original files
+app.get('/api/admin/originals', adminAuth, (req, res) => {
   try {
-    const { fileHash } = req.body;
+    const originals = db.getAllOriginals();
+    res.json({
+      success: true,
+      count: originals.length,
+      originals
+    });
+  } catch (error) {
+    console.error('Error fetching originals:', error);
+    res.status(500).json({ error: 'Failed to fetch originals' });
+  }
+});
 
-    if (!fileHash) {
-      return res.status(400).json({ error: 'File hash required' });
+// Admin: Delete original file
+app.delete('/api/admin/originals/:fileHash', adminAuth, (req, res) => {
+  try {
+    const { fileHash } = req.params;
+    const deleted = db.deleteOriginal(fileHash);
+    
+    if (deleted) {
+      res.json({
+        success: true,
+        message: 'Original file deleted'
+      });
+    } else {
+      res.status(404).json({ error: 'File not found' });
+    }
+  } catch (error) {
+    console.error('Error deleting original:', error);
+    res.status(500).json({ error: 'Failed to delete original' });
+  }
+});
+
+// ===================== USER ENDPOINTS =====================
+
+// User: Upload file for verification
+app.post('/api/verify-file', uploadVerify.single('file'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
     }
 
-    const result = blockchain.findTransactionByFileHash(fileHash);
+    const fileInfo = getFileInfo(req.file.path, req.file.originalname);
+    const hash = fileInfo.fileHash;
 
-    if (!result) {
+    // Check if original exists in database
+    const original = db.findOriginal(hash);
+
+    if (!original) {
       return res.json({
         verified: false,
-        message: 'File not found in blockchain'
+        message: 'Certificate not found in database. This file is not registered.',
+        uploadedHash: hash,
+        status: '✗ UNVERIFIED'
       });
     }
 
-    const registered = fileRegistry.get(fileHash);
-    const verificationResult = blockchain.verifyBlockchain(result.blockIndex, 10);
+    // File hash matches - increment verification count
+    db.incrementVerification(hash);
 
     res.json({
       verified: true,
-      verificationData: {
-        transaction: result.transaction,
-        blockIndex: result.blockIndex,
-        blockHash: result.blockHash,
-        blockValid: blockchain.chain[result.blockIndex].isValid(),
-        chainIntegrity: blockchain.isChainValid(),
-        verificationPath: verificationResult,
-        ...registered
+      message: 'Certificate verified successfully!',
+      status: '✓ VERIFIED',
+      originalFile: {
+        filename: original.filename,
+        size: original.size,
+        uploadedAt: original.uploadedAt,
+        verificationCount: original.verified + 1
+      },
+      uploadedFile: {
+        hash: hash,
+        filename: fileInfo.filename
+      },
+      hashComparison: {
+        originalHash: original.fileHash,
+        uploadedHash: hash,
+        match: original.fileHash === hash
       }
     });
   } catch (error) {
     console.error('Verification error:', error);
+    if (req.file) cleanupFile(req.file.path);
     res.status(500).json({ error: 'Verification failed' });
   }
 });
+
+// User: Get all available original certificates
+app.get('/api/certificates', (req, res) => {
+  try {
+    const certificates = db.getAllOriginals();
+    res.json({
+      success: true,
+      count: certificates.length,
+      certificates: certificates.map(cert => ({
+        fileHash: cert.fileHash,
+        filename: cert.filename,
+        size: cert.size,
+        uploadedAt: cert.uploadedAt,
+        verifications: cert.verified,
+        integrity: cert.integrity
+      }))
+    });
+  } catch (error) {
+    console.error('Error fetching certificates:', error);
+    res.status(500).json({ error: 'Failed to fetch certificates' });
+  }
+});
+
+// ===================== BLOCKCHAIN ENDPOINTS =====================
 
 app.get('/api/blockchain', (req, res) => {
   try {
