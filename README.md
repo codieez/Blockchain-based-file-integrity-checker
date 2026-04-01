@@ -6,7 +6,7 @@ This project is a full-stack app where an admin registers reference files and us
 
 ## What This Project Is
 
-- A file integrity checker, not a certificate-specific verifier.
+- A blockchain-backed file integrity checker for any file format.
 - Works with any file format (PDF, image, document, archive, etc.).
 - Uses SHA-256 hashes plus blockchain-style block linking for traceability.
 
@@ -99,7 +99,7 @@ Default admin key in this demo: `admin123`
 ### User Verification
 
 - `POST /api/verify-file` - Upload a file and verify against registered originals.
-- `GET /api/certificates` - List registered files for user view.
+- `GET /api/files/registered` - List registered files for user view.
 
 ### Blockchain / Diagnostics
 

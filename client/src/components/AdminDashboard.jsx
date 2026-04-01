@@ -3,21 +3,21 @@ import axios from 'axios';
 import { FaCopy, FaTrash, FaSync } from 'react-icons/fa';
 
 function AdminDashboard() {
-  const [certificates, setCertificates] = useState([]);
+  const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [copiedHash, setCopiedHash] = useState(null);
   const adminKey = 'admin123';
 
   useEffect(() => {
-    fetchCertificates();
+    fetchFiles();
   }, []);
 
-  const fetchCertificates = async () => {
+  const fetchFiles = async () => {
     try {
       const response = await axios.get('/api/admin/originals', {
         headers: { 'X-Admin-Key': adminKey }
       });
-      setCertificates(response.data.originals || []);
+      setFiles(response.data.originals || []);
     } catch (error) {
       console.error('Error fetching files:', error);
     } finally {
@@ -25,7 +25,7 @@ function AdminDashboard() {
     }
   };
 
-  const deleteCertificate = async (fileHash) => {
+  const deleteFile = async (fileHash) => {
     if (!window.confirm('Are you sure you want to delete this file?')) {
       return;
     }
@@ -34,7 +34,7 @@ function AdminDashboard() {
       await axios.delete(`/api/admin/originals/${fileHash}`, {
         headers: { 'X-Admin-Key': adminKey }
       });
-      setCertificates(certificates.filter(c => c.fileHash !== fileHash));
+      setFiles(files.filter((file) => file.fileHash !== fileHash));
     } catch (error) {
       console.error('Error deleting file:', error);
       alert('Failed to delete file');
@@ -72,7 +72,7 @@ function AdminDashboard() {
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-white">Admin Dashboard</h2>
         <button
-          onClick={fetchCertificates}
+          onClick={fetchFiles}
           className="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold rounded-lg transition-all duration-300 flex items-center gap-2"
         >
           <FaSync className="text-sm" />
@@ -83,12 +83,12 @@ function AdminDashboard() {
       <div className="grid grid-cols-3 gap-4">
         <div className="bg-slate-800/40 border border-green-500/20 rounded-lg p-4">
           <p className="text-gray-400 text-sm mb-1">Total Files</p>
-          <p className="text-3xl font-bold text-green-400">{certificates.length}</p>
+          <p className="text-3xl font-bold text-green-400">{files.length}</p>
         </div>
         <div className="bg-slate-800/40 border border-green-500/20 rounded-lg p-4">
           <p className="text-gray-400 text-sm mb-1">Total Verifications</p>
           <p className="text-3xl font-bold text-emerald-400">
-            {certificates.reduce((sum, c) => sum + (c.verified || 0), 0)}
+            {files.reduce((sum, file) => sum + (file.verified || 0), 0)}
           </p>
         </div>
         <div className="bg-slate-800/40 border border-green-500/20 rounded-lg p-4">
@@ -99,31 +99,31 @@ function AdminDashboard() {
 
       <div className="space-y-3">
         <h3 className="text-lg font-bold text-white">Registered Files</h3>
-        {certificates.length === 0 ? (
+        {files.length === 0 ? (
           <div className="text-center py-8 bg-slate-800/20 rounded-lg border border-green-500/20">
             <p className="text-gray-400">No files registered yet</p>
           </div>
         ) : (
           <div className="space-y-2">
-            {certificates.map((cert) => (
+            {files.map((file) => (
               <div
-                key={cert.fileHash}
+                key={file.fileHash}
                 className="border border-green-500/20 rounded-lg bg-slate-800/40 p-4 hover:border-green-500/40 transition-all"
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <h4 className="font-bold text-white">{cert.filename}</h4>
-                    <p className="text-xs text-gray-400 mt-1">{formatBytes(cert.size)} • {formatDate(cert.uploadedAt)}</p>
+                    <h4 className="font-bold text-white">{file.filename}</h4>
+                    <p className="text-xs text-gray-400 mt-1">{formatBytes(file.size)} • {formatDate(file.uploadedAt)}</p>
                     <div className="flex items-center gap-2 mt-2">
                       <code className="text-xs font-mono text-gray-400 bg-slate-900/50 rounded px-2 py-1 max-w-xs truncate">
-                        {cert.fileHash}
+                        {file.fileHash}
                       </code>
                       <button
-                        onClick={() => copyToClipboard(cert.fileHash, cert.fileHash)}
+                        onClick={() => copyToClipboard(file.fileHash, file.fileHash)}
                         className="p-1 hover:bg-green-500/20 rounded transition-colors"
                       >
                         <FaCopy className={`text-xs ${
-                          copiedHash === cert.fileHash ? 'text-green-400' : 'text-gray-400'
+                          copiedHash === file.fileHash ? 'text-green-400' : 'text-gray-400'
                         }`} />
                       </button>
                     </div>
@@ -131,10 +131,10 @@ function AdminDashboard() {
                   <div className="flex items-center gap-3 ml-4">
                     <div className="text-right">
                       <p className="text-xs text-gray-400">Verified</p>
-                      <p className="text-2xl font-bold text-green-400">{cert.verified || 0}</p>
+                      <p className="text-2xl font-bold text-green-400">{file.verified || 0}</p>
                     </div>
                     <button
-                      onClick={() => deleteCertificate(cert.fileHash)}
+                      onClick={() => deleteFile(file.fileHash)}
                       className="p-2 hover:bg-red-500/20 rounded transition-colors text-red-400"
                       title="Delete file"
                     >

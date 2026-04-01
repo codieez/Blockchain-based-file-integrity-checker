@@ -163,7 +163,7 @@ app.post('/api/verify-file', uploadVerify.single('file'), (req, res) => {
     if (!original) {
       return res.json({
         verified: false,
-        message: 'File not found in registry. This file is not registered.',
+        message: 'File is not valid. Matching hash was not found in the reference database.',
         status: '✗ UNVERIFIED',
         uploadedFile: {
           filename: fileInfo.filename,

@@ -4,10 +4,38 @@ import { FaUpload, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 
 function FileVerification() {
   const [file, setFile] = useState(null);
+  const [clientHash, setClientHash] = useState(null);
+  const [hashingPreview, setHashingPreview] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const fileInputRef = React.useRef(null);
+
+  const toHex = (buffer) => {
+    const bytes = new Uint8Array(buffer);
+    return Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('');
+  };
+
+  const generateClientHash = async (selectedFile) => {
+    setHashingPreview(true);
+    try {
+      const fileBuffer = await selectedFile.arrayBuffer();
+      const digest = await crypto.subtle.digest('SHA-256', fileBuffer);
+      setClientHash(toHex(digest));
+    } catch (hashError) {
+      console.error('Error generating client hash:', hashError);
+      setClientHash(null);
+    } finally {
+      setHashingPreview(false);
+    }
+  };
+
+  const selectFile = async (selectedFile) => {
+    setFile(selectedFile);
+    setError(null);
+    setResult(null);
+    await generateClientHash(selectedFile);
+  };
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -19,18 +47,14 @@ function FileVerification() {
     e.stopPropagation();
     const droppedFile = e.dataTransfer.files[0];
     if (droppedFile) {
-      setFile(droppedFile);
-      setError(null);
-      setResult(null);
+      void selectFile(droppedFile);
     }
   };
 
   const handleFileSelect = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
-      setFile(selectedFile);
-      setError(null);
-      setResult(null);
+      void selectFile(selectedFile);
     }
   };
 
@@ -54,6 +78,7 @@ function FileVerification() {
 
       setResult(response.data);
       setFile(null);
+      setClientHash(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
     } catch (err) {
       setError(err.response?.data?.error || 'Verification failed');
@@ -112,6 +137,22 @@ function FileVerification() {
         <div className="flex items-center gap-3 p-6 bg-gradient-to-r from-red-500/20 to-pink-500/10 border border-red-500/60 rounded-xl slide-in shadow-lg shadow-red-500/20">
           <FaTimesCircle className="text-red-400 flex-shrink-0 text-2xl" />
           <p className="text-red-300 font-medium">{error}</p>
+        </div>
+      )}
+
+      {file && (
+        <div className="rounded-xl border border-blue-500/40 bg-slate-900/40 p-5 space-y-3">
+          <h4 className="text-sm font-bold uppercase tracking-wider text-blue-300">Live Hash Demo (Before Submit)</h4>
+          <p className="text-sm text-gray-300">This hash is generated in-browser from file bytes using SHA-256.</p>
+          {hashingPreview ? (
+            <p className="text-sm text-yellow-300">Generating hash preview...</p>
+          ) : (
+            <>
+              <p className="text-xs text-gray-400">Client-side SHA-256 hash</p>
+              <p className="font-mono text-cyan-300 break-all text-sm">{clientHash || 'Could not generate hash preview'}</p>
+              <p className="text-xs text-gray-500">This should match the server hash for the same file.</p>
+            </>
+          )}
         </div>
       )}
 

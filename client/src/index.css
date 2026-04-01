@@ -177,7 +177,7 @@ body::after {
 @layer components {
   /* Premium Buttons */
   .btn-primary {
-    @apply relative px-8 py-4 font-bold rounded-xl transition-all duration-300 text-white text-sm tracking-wide overflow-hidden group;
+    @apply relative px-8 py-4 font-bold rounded-xl transition-all duration-300 text-white text-sm tracking-wide overflow-hidden;
     background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
     background-size: 200% 200%;
     box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3), 
