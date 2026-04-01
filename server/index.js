@@ -15,7 +15,7 @@ const app = express();
 const blockchain = new Blockchain(2);
 const db = new Database();
 
-// Storage for original files (admin uploads)
+// Storage for original reference files (admin uploads)
 const originalStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, path.join(__dirname, '../data/originals'));
@@ -66,7 +66,7 @@ const fileRegistry = new Map();
 
 // ===================== ADMIN ENDPOINTS =====================
 
-// Admin: Upload original certificate file
+// Admin: Upload original reference file
 app.post('/api/admin/upload-original', adminAuth, uploadOriginal.single('file'), (req, res) => {
   try {
     if (!req.file) {
@@ -89,7 +89,7 @@ app.post('/api/admin/upload-original', adminAuth, uploadOriginal.single('file'),
 
     res.json({
       success: true,
-      message: 'Original certificate uploaded and stored',
+      message: 'Original reference file uploaded and stored',
       data: {
         ...originalFile,
         blockIndex: block.index,
@@ -156,7 +156,7 @@ app.post('/api/verify-file', uploadVerify.single('file'), (req, res) => {
     if (!original) {
       return res.json({
         verified: false,
-        message: 'Certificate not found in database. This file is not registered.',
+        message: 'File not found in registry. This file is not registered.',
         uploadedHash: hash,
         status: '✗ UNVERIFIED'
       });
@@ -167,7 +167,7 @@ app.post('/api/verify-file', uploadVerify.single('file'), (req, res) => {
 
     res.json({
       verified: true,
-      message: 'Certificate verified successfully!',
+      message: 'File verified successfully!',
       status: '✓ VERIFIED',
       originalFile: {
         filename: original.filename,
@@ -192,14 +192,14 @@ app.post('/api/verify-file', uploadVerify.single('file'), (req, res) => {
   }
 });
 
-// User: Get all available original certificates
+// User: Get all available registered reference files
 app.get('/api/certificates', (req, res) => {
   try {
-    const certificates = db.getAllOriginals();
+    const files = db.getAllOriginals();
     res.json({
       success: true,
-      count: certificates.length,
-      certificates: certificates.map(cert => ({
+      count: files.length,
+      certificates: files.map(cert => ({
         fileHash: cert.fileHash,
         filename: cert.filename,
         size: cert.size,
@@ -209,8 +209,8 @@ app.get('/api/certificates', (req, res) => {
       }))
     });
   } catch (error) {
-    console.error('Error fetching certificates:', error);
-    res.status(500).json({ error: 'Failed to fetch certificates' });
+    console.error('Error fetching registered files:', error);
+    res.status(500).json({ error: 'Failed to fetch registered files' });
   }
 });
 

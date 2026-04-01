@@ -19,14 +19,14 @@ function AdminDashboard() {
       });
       setCertificates(response.data.originals || []);
     } catch (error) {
-      console.error('Error fetching certificates:', error);
+      console.error('Error fetching files:', error);
     } finally {
       setLoading(false);
     }
   };
 
   const deleteCertificate = async (fileHash) => {
-    if (!window.confirm('Are you sure you want to delete this certificate?')) {
+    if (!window.confirm('Are you sure you want to delete this file?')) {
       return;
     }
 
@@ -36,8 +36,8 @@ function AdminDashboard() {
       });
       setCertificates(certificates.filter(c => c.fileHash !== fileHash));
     } catch (error) {
-      console.error('Error deleting certificate:', error);
-      alert('Failed to delete certificate');
+      console.error('Error deleting file:', error);
+      alert('Failed to delete file');
     }
   };
 
@@ -82,7 +82,7 @@ function AdminDashboard() {
 
       <div className="grid grid-cols-3 gap-4">
         <div className="bg-slate-800/40 border border-green-500/20 rounded-lg p-4">
-          <p className="text-gray-400 text-sm mb-1">Total Certificates</p>
+          <p className="text-gray-400 text-sm mb-1">Total Files</p>
           <p className="text-3xl font-bold text-green-400">{certificates.length}</p>
         </div>
         <div className="bg-slate-800/40 border border-green-500/20 rounded-lg p-4">
@@ -98,10 +98,10 @@ function AdminDashboard() {
       </div>
 
       <div className="space-y-3">
-        <h3 className="text-lg font-bold text-white">Registered Certificates</h3>
+        <h3 className="text-lg font-bold text-white">Registered Files</h3>
         {certificates.length === 0 ? (
           <div className="text-center py-8 bg-slate-800/20 rounded-lg border border-green-500/20">
-            <p className="text-gray-400">No certificates registered yet</p>
+            <p className="text-gray-400">No files registered yet</p>
           </div>
         ) : (
           <div className="space-y-2">
@@ -136,7 +136,7 @@ function AdminDashboard() {
                     <button
                       onClick={() => deleteCertificate(cert.fileHash)}
                       className="p-2 hover:bg-red-500/20 rounded transition-colors text-red-400"
-                      title="Delete certificate"
+                      title="Delete file"
                     >
                       <FaTrash className="text-sm" />
                     </button>

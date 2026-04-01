@@ -55,7 +55,7 @@ function AdminUpload() {
       });
 
       if (response.data.success) {
-        setStatus({ type: 'success', message: 'Certificate uploaded successfully!' });
+        setStatus({ type: 'success', message: 'Reference file uploaded successfully!' });
         setUploadResult(response.data.data);
         setFile(null);
         if (fileInputRef.current) fileInputRef.current.value = '';
@@ -79,22 +79,22 @@ function AdminUpload() {
   };
 
   return (
-    <div className="space-y-6 max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold text-white mb-6">Add Original Certificate</h2>
+    <div className="space-y-6 max-w-2xl mx-auto fade-in">
+      <h2 className="text-2xl font-bold text-white mb-6">Add Reference File</h2>
 
       <div
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        className="relative border-2 border-dashed border-green-500/40 rounded-xl p-8 sm:p-12 text-center hover:border-green-500/80 transition-all duration-300 cursor-pointer bg-green-500/5 hover:bg-green-500/10"
+        className="relative border-2 border-dashed border-blue-500/40 rounded-xl p-8 sm:p-12 text-center hover:border-blue-500/80 transition-all duration-300 cursor-pointer bg-blue-500/5 hover:bg-blue-500/10"
         onClick={() => fileInputRef.current?.click()}
       >
         <div className="space-y-4">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 shadow-lg shadow-green-500/30">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg shadow-blue-500/30">
             <FaUpload className="text-3xl text-white" />
           </div>
           <div>
             <h3 className="text-xl font-bold mb-2 text-white">
-              {file ? file.name : 'Upload Original Certificate'}
+              {file ? file.name : 'Upload Original File'}
             </h3>
             <p className="text-gray-400">
               {file ? `${formatBytes(file.size)} • Ready to upload` : 'Drop your file here or click to browse'}
@@ -128,7 +128,7 @@ function AdminUpload() {
 
       {uploadResult && (
         <div className="bg-slate-700/30 border border-green-500/30 rounded-lg p-6 space-y-3 hover:border-green-500/50 transition-colors">
-          <h4 className="font-bold text-lg text-green-400">✓ Certificate Details</h4>
+          <h4 className="font-bold text-lg text-green-400">✓ Registered File Details</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             <div>
               <p className="text-gray-400 mb-1">Filename</p>
@@ -164,7 +164,7 @@ function AdminUpload() {
         }`}
       >
         <FaUpload className="text-lg" />
-        {uploading ? 'Uploading...' : 'Upload Certificate'}
+        {uploading ? 'Uploading...' : 'Upload File'}
       </button>
     </div>
   );

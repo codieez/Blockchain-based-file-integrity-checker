@@ -52,15 +52,15 @@ function CertificateList() {
     return (
       <div className="text-center py-12">
         <FaCheckCircle className="text-4xl text-green-400 mx-auto mb-4" />
-        <p className="text-gray-400 text-lg">No certificates registered yet</p>
-        <p className="text-gray-500 text-sm mt-2">Admin will add certificates here</p>
+        <p className="text-gray-400 text-lg">No files registered yet</p>
+        <p className="text-gray-500 text-sm mt-2">Admin can add reference files here</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold text-white mb-6">Available Certificates</h2>
+      <h2 className="text-2xl font-bold text-white mb-6">Registered Files</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {certificates.map((cert) => (
           <div
@@ -73,7 +73,7 @@ function CertificateList() {
                 <p className="text-xs text-gray-400 mt-1">{formatBytes(cert.size)}</p>
               </div>
               <div className="text-right">
-                <p className="text-sm text-g ray-400">Verified</p>
+                <p className="text-sm text-gray-400">Verified</p>
                 <p className="text-xl font-bold text-green-400">{cert.verifications}</p>
               </div>
             </div>
