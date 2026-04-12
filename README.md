@@ -88,7 +88,7 @@ chmod +x start.sh && ./start.sh
 
 Default admin key in this demo: `admin123`
 
-## Animated Workflow Chart
+## Workflow Chart
 
 ```mermaid
 %%{init: {'theme': 'base', 'themeVariables': {
@@ -119,9 +119,9 @@ flowchart LR
 		V5[Unverified: hash not found]:::fail
 	end
 
-	U e1@--> H
-	H e2@--> A1
-	H e3@--> V1
+	U --> H
+	H --> A1
+	H --> V1
 
 	A1 --> A2 --> A3 --> A4 --> A5
 	V1 --> V2 --> V3
@@ -139,11 +139,9 @@ flowchart LR
 	classDef fail fill:#450a0a,stroke:#ef4444,color:#fee2e2,stroke-width:2px;
 	classDef decision fill:#111827,stroke:#facc15,color:#fef9c3,stroke-width:2px;
 
-	classDef animated stroke-dasharray: 6 4, animation: fast;
-	class e1,e2,e3 animated;
 ```
 
-The animated links highlight the core timeline: upload -> hash -> register or verify.
+The chart highlights the core timeline: upload -> hash -> register or verify.
 
 ## API Overview
 
