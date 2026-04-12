@@ -4,7 +4,7 @@ import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { Blockchain } from './blockchain.js';
-import { calculateFileHash, getFileInfo, cleanupFile, verifyFileChain } from './fileHandler.js';
+import { getFileInfo, cleanupFile } from './fileHandler.js';
 import { Database } from './database.js';
 import { v4 as uuidv4 } from 'uuid';
 
