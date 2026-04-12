@@ -91,53 +91,34 @@ Default admin key in this demo: `admin123`
 ## Workflow Chart
 
 ```mermaid
-%%{init: {'theme': 'base', 'themeVariables': {
-'primaryColor': '#0b1020',
-'primaryTextColor': '#e5f0ff',
-'primaryBorderColor': '#00d4ff',
-'lineColor': '#7bd3ff',
-'secondaryColor': '#11233f',
-'tertiaryColor': '#0f172a'
-}}}%%
 flowchart LR
-	U[User or Admin Uploads File]:::entry
-	H[SHA-256 Hash Generated]:::process
+    U[User or Admin Uploads File]
+    H[SHA-256 Hash Generated]
 
-	subgraph Admin Path
-		A1[POST /api/admin/upload-original]:::admin
-		A2[Store Metadata in SQLite]:::store
-		A3[Add Transaction to Mempool]:::chain
-		A4[Mine New Block (PoW)]:::mine
-		A5[Return blockIndex + blockHash]:::ok
-	end
+    subgraph ADMIN_PATH [Admin Path]
+        A1[POST /api/admin/upload-original]
+        A2[Store Metadata in SQLite]
+        A3[Add Transaction to Mempool]
+        A4[Mine New Block PoW]
+        A5[Return block index and block hash]
+    end
 
-	subgraph Verification Path
-		V1[POST /api/verify-file]:::user
-		V2[Find Matching Hash in SQLite]:::store
-		V3{Hash Match?}:::decision
-		V4[Verified: increment count]:::ok
-		V5[Unverified: hash not found]:::fail
-	end
+    subgraph VERIFY_PATH [Verification Path]
+        V1[POST /api/verify-file]
+        V2[Find Matching Hash in SQLite]
+        V3{Hash Match}
+        V4[Verified increment count]
+        V5[Unverified hash not found]
+    end
 
-	U --> H
-	H --> A1
-	H --> V1
+    U --> H
+    H --> A1
+    H --> V1
 
-	A1 --> A2 --> A3 --> A4 --> A5
-	V1 --> V2 --> V3
-	V3 -->|Yes| V4
-	V3 -->|No| V5
-
-	classDef entry fill:#082f49,stroke:#22d3ee,color:#ecfeff,stroke-width:2px;
-	classDef process fill:#1e293b,stroke:#38bdf8,color:#e2e8f0,stroke-width:2px;
-	classDef admin fill:#052e16,stroke:#22c55e,color:#dcfce7,stroke-width:2px;
-	classDef user fill:#3b0764,stroke:#c084fc,color:#f3e8ff,stroke-width:2px;
-	classDef store fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:2px;
-	classDef chain fill:#3f1d0f,stroke:#fb923c,color:#ffedd5,stroke-width:2px;
-	classDef mine fill:#431407,stroke:#f97316,color:#ffedd5,stroke-width:3px;
-	classDef ok fill:#052e16,stroke:#4ade80,color:#dcfce7,stroke-width:2px;
-	classDef fail fill:#450a0a,stroke:#ef4444,color:#fee2e2,stroke-width:2px;
-	classDef decision fill:#111827,stroke:#facc15,color:#fef9c3,stroke-width:2px;
+    A1 --> A2 --> A3 --> A4 --> A5
+    V1 --> V2 --> V3
+    V3 -->|Yes| V4
+    V3 -->|No| V5
 
 ```
 
