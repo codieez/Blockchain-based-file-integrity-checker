@@ -1,11 +1,14 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import multer from 'multer';
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { Blockchain } from './blockchain.js';
 import { getFileInfo, cleanupFile } from './fileHandler.js';
 import { Database } from './database.js';
+import { Web3Service } from './web3Service.js';
 import { v4 as uuidv4 } from 'uuid';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -14,6 +17,7 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const blockchain = new Blockchain(2);
 const db = new Database();
+const web3Service = new Web3Service();
 
 // Storage for original reference files (admin uploads)
 const originalStorage = multer.diskStorage({
@@ -48,9 +52,13 @@ const uploadVerify = multer({
 app.use(cors());
 app.use(express.json());
 
-// Serve static files from the client build directory
+// Serve static frontend only when a production build exists.
 const clientDistPath = path.join(__dirname, '../client/dist');
-app.use(express.static(clientDistPath));
+const clientIndexPath = path.join(clientDistPath, 'index.html');
+const hasClientBuild = fs.existsSync(clientIndexPath);
+if (hasClientBuild) {
+  app.use(express.static(clientDistPath));
+}
 
 // Simple authentication middleware for admin (in production, use proper JWT)
 const adminAuth = (req, res, next) => {
@@ -67,7 +75,7 @@ const fileRegistry = new Map();
 // ===================== ADMIN ENDPOINTS =====================
 
 // Admin: Upload original reference file
-app.post('/api/admin/upload-original', adminAuth, uploadOriginal.single('file'), (req, res) => {
+app.post('/api/admin/upload-original', adminAuth, uploadOriginal.single('file'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
@@ -87,14 +95,23 @@ app.post('/api/admin/upload-original', adminAuth, uploadOriginal.single('file'),
     blockchain.addTransactionToMempool(fileInfo.fileHash, fileInfo.filename, fileInfo.size);
     const block = blockchain.mineBlock('Admin');
 
+    // Optional: anchor hash on a real EVM chain when configured.
+    const chainAnchor = await web3Service.recordFileOnChain({
+      fileHash: fileInfo.fileHash,
+      filename: fileInfo.filename,
+      size: fileInfo.size
+    });
+
     res.json({
       success: true,
       message: 'Original reference file uploaded and stored',
       data: {
         ...originalFile,
         blockIndex: block.index,
-        blockHash: block.hash
-      }
+        blockHash: block.hash,
+        chainAnchor
+      },
+      web3: await web3Service.getStatus()
     });
   } catch (error) {
     console.error('Admin upload error:', error);
@@ -141,7 +158,7 @@ app.delete('/api/admin/originals/:fileHash', adminAuth, (req, res) => {
 // ===================== USER ENDPOINTS =====================
 
 // User: Upload file for verification
-app.post('/api/verify-file', uploadVerify.single('file'), (req, res) => {
+app.post('/api/verify-file', uploadVerify.single('file'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
@@ -161,6 +178,7 @@ app.post('/api/verify-file', uploadVerify.single('file'), (req, res) => {
     };
 
     if (!original) {
+      const onChain = await web3Service.verifyFileHash(hash);
       return res.json({
         verified: false,
         message: 'File is not valid. Matching hash was not found in the reference database.',
@@ -172,6 +190,7 @@ app.post('/api/verify-file', uploadVerify.single('file'), (req, res) => {
           hash: hash
         },
         hashComparison,
+        onChain,
         verificationFlow: {
           generatedHash: true,
           lookedUpInDatabase: true,
@@ -183,6 +202,7 @@ app.post('/api/verify-file', uploadVerify.single('file'), (req, res) => {
 
     // File hash matches - increment verification count
     db.incrementVerification(hash);
+    const onChain = await web3Service.verifyFileHash(hash);
 
     res.json({
       verified: true,
@@ -201,6 +221,7 @@ app.post('/api/verify-file', uploadVerify.single('file'), (req, res) => {
         filename: fileInfo.filename
       },
       hashComparison,
+      onChain,
       verificationFlow: {
         generatedHash: true,
         lookedUpInDatabase: true,
@@ -212,6 +233,26 @@ app.post('/api/verify-file', uploadVerify.single('file'), (req, res) => {
     console.error('Verification error:', error);
     if (req.file) cleanupFile(req.file.path);
     res.status(500).json({ error: 'Verification failed' });
+  }
+});
+
+app.get('/api/web3/status', async (req, res) => {
+  try {
+    const status = await web3Service.getStatus();
+    res.json(status);
+  } catch (error) {
+    console.error('Web3 status error:', error);
+    res.status(500).json({ error: 'Failed to fetch web3 status' });
+  }
+});
+
+app.get('/api/web3/verify/:fileHash', async (req, res) => {
+  try {
+    const verification = await web3Service.verifyFileHash(req.params.fileHash);
+    res.json(verification);
+  } catch (error) {
+    console.error('Web3 verify error:', error);
+    res.status(500).json({ error: 'Failed to verify hash on chain' });
   }
 });
 
@@ -451,10 +492,21 @@ app.get('/api/transaction/:hash', (req, res) => {
   }
 });
 
-// Serve index.html for all non-API routes (SPA routing)
-app.get('*', (req, res) => {
-  res.sendFile(path.join(clientDistPath, 'index.html'));
-});
+// Serve index.html for all non-API routes (SPA routing) when build is present.
+if (hasClientBuild) {
+  app.get('*', (req, res) => {
+    return res.sendFile(clientIndexPath);
+  });
+} else {
+  // In development, backend can run without forcing frontend build artifacts.
+  app.get('/', (req, res) => {
+    return res.json({
+      message: 'Backend is running. Start the client dev server with: cd client && npm run dev',
+      apiBase: '/api',
+      frontendBuildDetected: false
+    });
+  });
+}
 
 const PORT = process.env.PORT || 5000;
 

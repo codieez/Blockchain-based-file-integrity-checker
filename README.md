@@ -2,7 +2,7 @@
 
 Blockchain-backed integrity verification for any file type.
 
-This project is a full-stack app where an admin registers reference files and users verify uploaded files against those registered hashes. Each registration is recorded in a simulated blockchain using Proof of Work, so integrity evidence is auditable and tamper-evident.
+This project is a full-stack app where an admin registers reference files and users verify uploaded files against those registered hashes. Each registration is recorded in a simulated blockchain using Proof of Work, and can also be anchored on an EVM chain when optional Web3 configuration is enabled.
 
 ## What This Project Is
 
@@ -18,21 +18,26 @@ This project is a full-stack app where an admin registers reference files and us
 - Blockchain explorer data (blocks, mempool, mining stats).
 - Admin workflow for managing registered reference files.
 - User workflow for checking whether a file matches a registered original.
+- Optional EVM anchoring for file hashes through a Solidity contract.
 
 ## Tech Stack
 
-- Backend: Node.js, Express, Multer, SQLite (better-sqlite3)
+- Backend: Node.js, Express, Multer, local JSON storage
 - Frontend: React, Vite, Tailwind CSS, Axios
 - Crypto: SHA-256 hashing via Node crypto APIs
+- Optional chain tooling: Hardhat, Ethers, Solidity
 
 ## Project Structure
 
 ```text
 .
-├── server/              # API and blockchain logic
+├── server/              # API, simulated blockchain, optional web3 service
 ├── client/              # React frontend
+├── contracts/           # Solidity smart contract
+├── scripts/             # Hardhat deploy script
 ├── data/                # Local data storage
-├── uploads/             # Uploaded files (runtime)
+├── hardhat.config.cjs   # Hardhat network/compiler config
+├── .env.example         # Environment template
 ├── start.sh             # Convenience startup script
 └── test-demo.sh         # API demo script
 ```
@@ -51,6 +56,22 @@ npm install
 cd client && npm install && cd ..
 ```
 
+### Configure Environment
+
+```bash
+cp .env.example .env
+```
+
+By default, optional on-chain anchoring is disabled and the app runs with the existing local flow.
+
+To enable Web3 anchoring, set the following in .env:
+
+- ENABLE_WEB3_ANCHORING=true
+- WEB3_RPC_URL=your_rpc_url
+- WEB3_PRIVATE_KEY=your_signer_private_key
+- WEB3_CONTRACT_ADDRESS=deployed_contract_address
+- WEB3_CHAIN_ID=11155111 (or your target chain)
+
 ### Run in Development
 
 ```bash
@@ -61,6 +82,11 @@ This starts:
 
 - Backend: http://localhost:5000
 - Frontend: http://localhost:3000
+
+Notes:
+
+- In development, backend can run even when client/dist is missing.
+- In production-style serving from backend, build frontend first using npm run build.
 
 ### Other Useful Commands
 
@@ -73,6 +99,21 @@ npm run client
 
 # Build frontend
 npm run build
+
+# Compile smart contract
+npm run chain:compile
+
+# Start local hardhat node
+npm run chain:node
+
+# Deploy to local node
+npm run chain:deploy:local
+
+# Deploy locally and auto-enable Web3 in .env
+npm run chain:deploy:local:enable
+
+# Deploy to Sepolia
+npm run chain:deploy:sepolia
 
 # Alternative startup script
 chmod +x start.sh && ./start.sh
@@ -97,7 +138,7 @@ flowchart LR
 
     subgraph ADMIN_PATH [Admin Path]
         A1[POST /api/admin/upload-original]
-        A2[Store Metadata in SQLite]
+        A2[Store Metadata in local JSON database]
         A3[Add Transaction to Mempool]
         A4[Mine New Block PoW]
         A5[Return block index and block hash]
@@ -147,8 +188,29 @@ The chart highlights the core timeline: upload -> hash -> register or verify.
 - `POST /api/simulate-attack`
 - `GET /api/verify-blockchain/:depth`
 
+### Web3 (Optional)
+
+- `GET /api/web3/status`
+- `GET /api/web3/verify/:fileHash`
+
 ## Notes
 
 - This is a local/demo environment and uses a simple admin key check.
 - For production use, replace admin auth with proper identity and authorization.
 - Persisted data and uploaded files are stored locally under `data/`.
+- Optional Web3 anchoring is fail-safe. If not configured, the original project flow continues unchanged.
+- Optional blockchain anchoring is implemented at backend/contract level, so existing frontend screens remain unchanged.
+
+## 2-Minute Local Blockchain Proof (5 Commands)
+
+Use this to demonstrate proper blockchain connection using a local Hardhat chain.
+
+1) `cp .env.example .env`
+2) `npm run chain:node`
+3) `npm run chain:deploy:local:enable`
+4) `npm run server`
+5) `curl -s http://localhost:5000/api/web3/status | jq .`
+
+Expected result from command 5: `enabled: true` and `ready: true`.
+
+To return to simulation-only mode, set `ENABLE_WEB3_ANCHORING=false` in `.env`.
