@@ -2,7 +2,7 @@
 
 Blockchain-backed integrity verification for any file type.
 
-This project is a full-stack app where an admin registers reference files and users verify uploaded files against those registered hashes. Each registration is recorded in a simulated blockchain using Proof of Work, and can also be anchored on an EVM chain when optional Web3 configuration is enabled.
+This project is a full-stack app where an admin registers reference files and users verify uploaded files against those registered hashes. Each registration is recorded on an EVM chain via a Solidity contract (Hardhat for local development), so integrity evidence is auditable and tamper-evident.
 
 ## What This Project Is
 
@@ -13,25 +13,25 @@ This project is a full-stack app where an admin registers reference files and us
 ## Key Features
 
 - File hash registration and verification using SHA-256.
-- Proof of Work mining with difficulty tracking.
-- Merkle root per block for transaction integrity.
-- Blockchain explorer data (blocks, mempool, mining stats).
+- Solidity-based on-chain file hash registry.
+- Hardhat local chain support for development.
+- Blockchain explorer data (blocks, mempool, chain stats).
 - Admin workflow for managing registered reference files.
 - User workflow for checking whether a file matches a registered original.
-- Optional EVM anchoring for file hashes through a Solidity contract.
+- EVM anchoring for file hashes through a Solidity contract.
 
 ## Tech Stack
 
 - Backend: Node.js, Express, Multer, local JSON storage
 - Frontend: React, Vite, Tailwind CSS, Axios
 - Crypto: SHA-256 hashing via Node crypto APIs
-- Optional chain tooling: Hardhat, Ethers, Solidity
+- Chain tooling: Hardhat, Ethers, Solidity
 
 ## Project Structure
 
 ```text
 .
-├── server/              # API, simulated blockchain, optional web3 service
+├── server/              # API and EVM web3 service
 ├── client/              # React frontend
 ├── contracts/           # Solidity smart contract
 ├── scripts/             # Hardhat deploy script
@@ -62,21 +62,28 @@ cd client && npm install && cd ..
 cp .env.example .env
 ```
 
-By default, optional on-chain anchoring is disabled and the app runs with the existing local flow.
-
-To enable Web3 anchoring, set the following in .env:
+Use Hardhat local chain values in `.env` for local development:
 
 - ENABLE_WEB3_ANCHORING=true
-- WEB3_RPC_URL=your_rpc_url
-- WEB3_PRIVATE_KEY=your_signer_private_key
-- WEB3_CONTRACT_ADDRESS=deployed_contract_address
-- WEB3_CHAIN_ID=11155111 (or your target chain)
+- WEB3_CHAIN_ID=31337
+- WEB3_RPC_URL=http://127.0.0.1:8545
+- WEB3_PRIVATE_KEY=<hardhat account private key>
+- WEB3_CONTRACT_ADDRESS=<deployed_contract_address>
+
+For quick local setup, you can run deploy with env auto-write:
+
+```bash
+npm run chain:node
+npm run chain:deploy:local:enable
+```
 
 ### Run in Development
 
 ```bash
 npm run dev
 ```
+
+Before starting the app stack, make sure the local Hardhat node is running and the contract has been deployed.
 
 This starts:
 
@@ -91,6 +98,12 @@ Notes:
 ### Other Useful Commands
 
 ```bash
+# Start local hardhat node
+npm run chain:node
+
+# Deploy contract to local node
+npm run chain:deploy:local:enable
+
 # Run backend only
 npm run server
 
@@ -102,9 +115,6 @@ npm run build
 
 # Compile smart contract
 npm run chain:compile
-
-# Start local hardhat node
-npm run chain:node
 
 # Deploy to local node
 npm run chain:deploy:local
@@ -139,14 +149,14 @@ flowchart LR
     subgraph ADMIN_PATH [Admin Path]
         A1[POST /api/admin/upload-original]
         A2[Store Metadata in local JSON database]
-        A3[Add Transaction to Mempool]
-        A4[Mine New Block PoW]
-        A5[Return block index and block hash]
+        A3[Write hash on-chain via Solidity contract]
+        A4[Network includes tx in block]
+        A5[Return block number and block hash]
     end
 
     subgraph VERIFY_PATH [Verification Path]
         V1[POST /api/verify-file]
-        V2[Find Matching Hash in SQLite]
+        V2[Find Matching Hash in local JSON database]
         V3{Hash Match}
         V4[Verified increment count]
         V5[Unverified hash not found]
@@ -169,7 +179,7 @@ The chart highlights the core timeline: upload -> hash -> register or verify.
 
 ### Admin
 
-- `POST /api/admin/upload-original` - Register and mine a reference file.
+- `POST /api/admin/upload-original` - Register reference file and anchor hash on-chain.
 - `GET /api/admin/originals` - List registered files.
 - `DELETE /api/admin/originals/:fileHash` - Remove a registered file.
 
@@ -180,15 +190,13 @@ The chart highlights the core timeline: upload -> hash -> register or verify.
 
 ### Blockchain / Diagnostics
 
-- `GET /api/blockchain`
-- `GET /api/block/:index`
-- `GET /api/mining-stats`
-- `GET /api/mempool`
-- `POST /api/mine`
-- `POST /api/simulate-attack`
-- `GET /api/verify-blockchain/:depth`
+- `GET /api/blockchain` - Chain snapshot and stats from connected network.
+- `GET /api/block/:index` - Detailed block info.
+- `GET /api/mining-stats` - Timing/difficulty history from recent blocks.
+- `GET /api/mempool` - Pending contract transactions.
+- `GET /api/verify-blockchain/:depth` - Link validation for recent blocks.
 
-### Web3 (Optional)
+### Web3
 
 - `GET /api/web3/status`
 - `GET /api/web3/verify/:fileHash`
@@ -198,8 +206,7 @@ The chart highlights the core timeline: upload -> hash -> register or verify.
 - This is a local/demo environment and uses a simple admin key check.
 - For production use, replace admin auth with proper identity and authorization.
 - Persisted data and uploaded files are stored locally under `data/`.
-- Optional Web3 anchoring is fail-safe. If not configured, the original project flow continues unchanged.
-- Optional blockchain anchoring is implemented at backend/contract level, so existing frontend screens remain unchanged.
+- Hardhat/EVM anchoring is implemented at backend/contract level, so existing frontend screens remain unchanged.
 
 ## 2-Minute Local Blockchain Proof (5 Commands)
 
@@ -213,4 +220,4 @@ Use this to demonstrate proper blockchain connection using a local Hardhat chain
 
 Expected result from command 5: `enabled: true` and `ready: true`.
 
-To return to simulation-only mode, set `ENABLE_WEB3_ANCHORING=false` in `.env`.
+If you use a remote chain, update `WEB3_RPC_URL`, `WEB3_PRIVATE_KEY`, `WEB3_CHAIN_ID`, and `WEB3_CONTRACT_ADDRESS` accordingly.

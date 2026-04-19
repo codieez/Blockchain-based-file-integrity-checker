@@ -5,7 +5,6 @@ import multer from 'multer';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { Blockchain } from './blockchain.js';
 import { getFileInfo, cleanupFile } from './fileHandler.js';
 import { Database } from './database.js';
 import { Web3Service } from './web3Service.js';
@@ -15,7 +14,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const blockchain = new Blockchain(2);
 const db = new Database();
 const web3Service = new Web3Service();
 
@@ -91,24 +89,36 @@ app.post('/api/admin/upload-original', adminAuth, uploadOriginal.single('file'),
       fileInfo.uploadedAt
     );
 
-    // Add to blockchain
-    blockchain.addTransactionToMempool(fileInfo.fileHash, fileInfo.filename, fileInfo.size);
-    const block = blockchain.mineBlock('Admin');
-
-    // Optional: anchor hash on a real EVM chain when configured.
+    // Record on the actual EVM chain.
     const chainAnchor = await web3Service.recordFileOnChain({
       fileHash: fileInfo.fileHash,
       filename: fileInfo.filename,
       size: fileInfo.size
     });
 
+    if (!chainAnchor.anchored) {
+      db.deleteOriginal(fileInfo.fileHash);
+      cleanupFile(req.file.path);
+      const reason = chainAnchor.reason || 'Unknown blockchain error';
+      return res.status(503).json({
+        error: `Blockchain transaction failed. File was not registered. ${reason}`,
+        chainAnchor,
+        web3: await web3Service.getStatus(),
+        nextSteps: [
+          'Start local chain: npm run chain:node',
+          'Deploy contract: npm run chain:deploy:local:enable',
+          'Restart backend: npm run server'
+        ]
+      });
+    }
+
     res.json({
       success: true,
       message: 'Original reference file uploaded and stored',
       data: {
         ...originalFile,
-        blockIndex: block.index,
-        blockHash: block.hash,
+        blockIndex: chainAnchor.blockNumber,
+        blockHash: chainAnchor.blockHash,
         chainAnchor
       },
       web3: await web3Service.getStatus()
@@ -282,25 +292,13 @@ app.get('/api/files/registered', (req, res) => {
 
 app.get('/api/blockchain', (req, res) => {
   try {
-    const stats = blockchain.getChainStats();
-    const chain = blockchain.getBlockchain().map(block => ({
-      index: block.index,
-      timestamp: block.timestamp,
-      hash: block.hash,
-      previousHash: block.previousHash,
-      merkleRoot: block.merkleRoot,
-      difficulty: block.difficulty,
-      transactionCount: block.transactions.length,
-      blockSize: block.getBlockSize(),
-      nonce: block.nonce,
-      isValid: block.isValid()
-    }));
-
-    res.json({
-      stats,
-      chain,
-      isValid: blockchain.isChainValid()
-    });
+    web3Service
+      .getChainSnapshot()
+      .then(snapshot => res.json(snapshot))
+      .catch(error => {
+        console.error('Blockchain error:', error);
+        res.status(500).json({ error: 'Failed to retrieve blockchain' });
+      });
   } catch (error) {
     console.error('Blockchain error:', error);
     res.status(500).json({ error: 'Failed to retrieve blockchain' });
@@ -318,7 +316,7 @@ app.get('/api/files', (req, res) => {
       blockHash: entry.blockHash,
       registryId: entry.registryId,
       transactionId: entry.transactionId,
-      verified: blockchain.verifyFileIntegrity(entry.fileInfo.fileHash, entry.blockIndex)
+      verified: true
     }));
 
     res.json({ files, totalFiles: files.length });
@@ -328,10 +326,10 @@ app.get('/api/files', (req, res) => {
   }
 });
 
-app.get('/api/block/:index', (req, res) => {
+app.get('/api/block/:index', async (req, res) => {
   try {
     const index = parseInt(req.params.index);
-    const blockInfo = blockchain.getDetailedBlockInfo(index);
+    const blockInfo = await web3Service.getDetailedBlockInfo(index);
 
     if (!blockInfo) {
       return res.status(404).json({ error: 'Block not found' });
@@ -344,7 +342,7 @@ app.get('/api/block/:index', (req, res) => {
   }
 });
 
-app.post('/api/recheck', express.json(), (req, res) => {
+app.post('/api/recheck', express.json(), async (req, res) => {
   try {
     const { fileHash, blockIndex } = req.body;
 
@@ -352,16 +350,19 @@ app.post('/api/recheck', express.json(), (req, res) => {
       return res.status(400).json({ error: 'File hash and block index required' });
     }
 
-    const isIntact = blockchain.verifyFileIntegrity(fileHash, blockIndex);
-    const blockValid = blockchain.chain[blockIndex]?.isValid() || false;
-    const verificationPath = blockchain.verifyBlockchain(blockIndex, 10);
+    const [isIntact, blockInfo, chainSnapshot, verificationPath] = await Promise.all([
+      web3Service.verifyFileIntegrity(fileHash, blockIndex),
+      web3Service.getDetailedBlockInfo(blockIndex),
+      web3Service.getChainSnapshot(),
+      web3Service.verifyBlockchain(blockIndex, 10)
+    ]);
 
     res.json({
       fileHash,
       blockIndex,
       isIntact,
-      blockValid,
-      chainValid: blockchain.isChainValid(),
+      blockValid: Boolean(blockInfo?.isValid),
+      chainValid: Boolean(chainSnapshot?.isValid),
       verificationPath,
       timestamp: new Date().toISOString()
     });
@@ -371,9 +372,9 @@ app.post('/api/recheck', express.json(), (req, res) => {
   }
 });
 
-app.get('/api/mining-stats', (req, res) => {
+app.get('/api/mining-stats', async (req, res) => {
   try {
-    const stats = blockchain.getMiningStatistics();
+    const stats = await web3Service.getMiningStatistics();
     res.json(stats);
   } catch (error) {
     console.error('Mining stats error:', error);
@@ -381,89 +382,33 @@ app.get('/api/mining-stats', (req, res) => {
   }
 });
 
-app.get('/api/mempool', (req, res) => {
+app.get('/api/mempool', async (req, res) => {
   try {
-    const mempool = blockchain.mempool.map(tx => ({
-      id: tx.id,
-      fileHash: tx.fileHash,
-      filename: tx.filename,
-      size: tx.size,
-      timestamp: tx.timestamp
-    }));
-
-    res.json({
-      mempoolSize: mempool.length,
-      transactions: mempool
-    });
+    const mempool = await web3Service.getMempool();
+    res.json(mempool);
   } catch (error) {
     console.error('Mempool error:', error);
     res.status(500).json({ error: 'Failed to retrieve mempool' });
   }
 });
 
-app.post('/api/mine', express.json(), (req, res) => {
-  try {
-    const { minerAddress } = req.body;
-
-    if (blockchain.mempool.length === 0) {
-      return res.status(400).json({ error: 'No transactions in mempool to mine' });
-    }
-
-    const block = blockchain.mineBlock(minerAddress || 'Manual Miner');
-
-    res.json({
-      success: true,
-      block: {
-        index: block.index,
-        hash: block.hash,
-        timestamp: block.timestamp,
-        difficulty: block.difficulty,
-        nonce: block.nonce,
-        transactionCount: block.transactions.length,
-        miningStats: block.miningStats
-      },
-      chainStats: blockchain.getChainStats()
-    });
-  } catch (error) {
-    console.error('Mining error:', error);
-    res.status(500).json({ error: 'Mining failed' });
-  }
-});
-
-app.post('/api/simulate-attack', express.json(), (req, res) => {
-  try {
-    const { blockIndex } = req.body;
-
-    if (blockIndex === undefined) {
-      return res.status(400).json({ error: 'Block index required' });
-    }
-
-    const result = blockchain.simulateAttack(blockIndex);
-
-    res.json({
-      attackSimulation: result,
-      currentChainState: {
-        isValid: blockchain.isChainValid(),
-        totalBlocks: blockchain.chain.length
-      }
-    });
-  } catch (error) {
-    console.error('Attack simulation error:', error);
-    res.status(500).json({ error: 'Attack simulation failed' });
-  }
-});
-
-app.get('/api/verify-blockchain/:depth', (req, res) => {
+app.get('/api/verify-blockchain/:depth', async (req, res) => {
   try {
     const depth = parseInt(req.params.depth) || 10;
-    const latestBlockIndex = blockchain.chain.length - 1;
+    const status = await web3Service.getStatus();
 
-    const verification = blockchain.verifyBlockchain(latestBlockIndex, depth);
+    if (!status.ready) {
+      return res.status(503).json({ error: status.reason || 'Web3 service unavailable' });
+    }
+
+    const latestBlockIndex = status.latestBlock;
+
+    const verification = await web3Service.verifyBlockchain(latestBlockIndex, depth);
 
     res.json({
       verification,
-      chainValid: blockchain.isChainValid(),
-      totalBlocks: blockchain.chain.length
+      chainValid: verification.valid,
+      totalBlocks: latestBlockIndex + 1
     });
   } catch (error) {
     console.error('Chain verification error:', error);
@@ -471,10 +416,10 @@ app.get('/api/verify-blockchain/:depth', (req, res) => {
   }
 });
 
-app.get('/api/transaction/:hash', (req, res) => {
+app.get('/api/transaction/:hash', async (req, res) => {
   try {
     const { hash } = req.params;
-    const result = blockchain.findTransactionByFileHash(hash);
+    const result = await web3Service.findTransactionByFileHash(hash);
 
     if (!result) {
       return res.status(404).json({ error: 'Transaction not found' });
@@ -484,7 +429,7 @@ app.get('/api/transaction/:hash', (req, res) => {
       transaction: result.transaction,
       blockIndex: result.blockIndex,
       blockHash: result.blockHash,
-      blockDetails: blockchain.getDetailedBlockInfo(result.blockIndex)
+      blockDetails: await web3Service.getDetailedBlockInfo(result.blockIndex)
     });
   } catch (error) {
     console.error('Transaction lookup error:', error);
@@ -512,6 +457,5 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`\n🔗 Blockchain Server running on http://localhost:${PORT}`);
-  console.log(`📊 Blockchain initialized with difficulty: ${blockchain.difficulty}`);
-  console.log(`🔐 Genesis block created: ${blockchain.chain[0].hash.substring(0, 16)}...\n`);
+  console.log('📊 Real EVM blockchain backend enabled (no simulated chain)\n');
 });

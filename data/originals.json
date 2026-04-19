@@ -43,16 +43,16 @@
     "fileHash": "e9c18ebfae8d4b06411d9a1d7f4e49d51edd12257b52c3bc4180613fbeaf4fe8",
     "filename": "MiniProjectSchedule.xlsx",
     "size": 10536,
-    "uploadedAt": "2026-04-19T06:10:52.750Z",
-    "verified": 1,
+    "uploadedAt": "2026-04-19T14:02:19.252Z",
+    "verified": 0,
     "integrity": "✓ Valid"
   },
   "758a7acca4a5d89fbe44bc454686116bdb7cacb7ed8cee1ebb84b9728bfd9bed": {
     "fileHash": "758a7acca4a5d89fbe44bc454686116bdb7cacb7ed8cee1ebb84b9728bfd9bed",
     "filename": "Cognizant Industry Level Themes document.pdf",
     "size": 329028,
-    "uploadedAt": "2026-04-19T06:28:27.153Z",
-    "verified": 1,
+    "uploadedAt": "2026-04-19T14:01:01.047Z",
+    "verified": 0,
     "integrity": "✓ Valid"
   },
   "c79dee2dfde53cbfc261e3c0e7591bea51b923795578f5c5995ea63d7626b55b": {
@@ -92,6 +92,30 @@
     "filename": "ARCH_3_DATASET_PREPARATION.md",
     "size": 34380,
     "uploadedAt": "2026-04-19T06:25:36.860Z",
+    "verified": 1,
+    "integrity": "✓ Valid"
+  },
+  "6b9b72861ec635d5fbd8accd1b6bc8f8a121ec170b4f02891992a5212c48f5c6": {
+    "fileHash": "6b9b72861ec635d5fbd8accd1b6bc8f8a121ec170b4f02891992a5212c48f5c6",
+    "filename": "hardhat_upload_test.txt",
+    "size": 18,
+    "uploadedAt": "2026-04-19T13:04:26.946Z",
+    "verified": 1,
+    "integrity": "✓ Valid"
+  },
+  "31785d9ca06d2186d8f61565cbb8cb9c414909348968c3e602b070115f90b645": {
+    "fileHash": "31785d9ca06d2186d8f61565cbb8cb9c414909348968c3e602b070115f90b645",
+    "filename": "hardhat_only_test_unique.txt",
+    "size": 39,
+    "uploadedAt": "2026-04-19T13:34:10.639Z",
+    "verified": 0,
+    "integrity": "✓ Valid"
+  },
+  "4c9d5f374ee2fd8fb7ce428a3642c7c986c5da2747310a3d17c591c5f58c0269": {
+    "fileHash": "4c9d5f374ee2fd8fb7ce428a3642c7c986c5da2747310a3d17c591c5f58c0269",
+    "filename": "full_smoke_test.txt",
+    "size": 31,
+    "uploadedAt": "2026-04-19T13:37:21.748Z",
     "verified": 1,
     "integrity": "✓ Valid"
   }
