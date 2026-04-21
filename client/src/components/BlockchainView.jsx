@@ -214,7 +214,7 @@ function BlockchainView() {
 
                     <div className="bg-slate-800/40 rounded-lg p-3 border border-green-500/20">
                       <p className="text-gray-400 text-xs font-bold uppercase mb-2">Merkle Root</p>
-                      <p className="font-mono text-xs text-cyan-300 break-all">{block.merkleRoot}</p>
+                      <p className="font-mono text-xs text-cyan-300 break-all">{block.merkleRoot || 'Unavailable'}</p>
                     </div>
                   </div>
                 )}

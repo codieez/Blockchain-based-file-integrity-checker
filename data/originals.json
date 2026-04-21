@@ -1,100 +1,4 @@
 {
-  "92d29b3cae7208268d9cebf11c4944490df32e26115e8680a76afaf21094bf10": {
-    "fileHash": "92d29b3cae7208268d9cebf11c4944490df32e26115e8680a76afaf21094bf10",
-    "filename": "README.md",
-    "size": 2522,
-    "uploadedAt": "2026-04-01T06:59:14.593Z",
-    "verified": 0,
-    "integrity": "✓ Valid"
-  },
-  "c0b1d92bea9c43172abf099d299c3b06e336180336dab208df84c7609d6df9f4": {
-    "fileHash": "c0b1d92bea9c43172abf099d299c3b06e336180336dab208df84c7609d6df9f4",
-    "filename": "test-cert.txt",
-    "size": 18,
-    "uploadedAt": "2026-04-01T07:00:40.628Z",
-    "verified": 0,
-    "integrity": "✓ Valid"
-  },
-  "e3c155280788cadca60b63442630bd9c5333fac251eaf679bdc342471495fa0d": {
-    "fileHash": "e3c155280788cadca60b63442630bd9c5333fac251eaf679bdc342471495fa0d",
-    "filename": "Screenshot 2025-05-30 144830.png",
-    "size": 436545,
-    "uploadedAt": "2026-04-01T07:01:25.708Z",
-    "verified": 3,
-    "integrity": "✓ Valid"
-  },
-  "b666ed0e976291eaade0912730440f7d24e4e2778498df8ad5acda6c364a4a18": {
-    "fileHash": "b666ed0e976291eaade0912730440f7d24e4e2778498df8ad5acda6c364a4a18",
-    "filename": "Blockchain-based File Integrity Checker.docx",
-    "size": 221329,
-    "uploadedAt": "2026-04-18T11:20:38.381Z",
-    "verified": 0,
-    "integrity": "✓ Valid"
-  },
-  "eef803f0d77133b123326d8c1d1978f329f196c8b29480952c44684d60df08b3": {
-    "fileHash": "eef803f0d77133b123326d8c1d1978f329f196c8b29480952c44684d60df08b3",
-    "filename": "GEN AI 9th Program.docx",
-    "size": 28644,
-    "uploadedAt": "2026-04-18T11:20:52.066Z",
-    "verified": 1,
-    "integrity": "✓ Valid"
-  },
-  "e9c18ebfae8d4b06411d9a1d7f4e49d51edd12257b52c3bc4180613fbeaf4fe8": {
-    "fileHash": "e9c18ebfae8d4b06411d9a1d7f4e49d51edd12257b52c3bc4180613fbeaf4fe8",
-    "filename": "MiniProjectSchedule.xlsx",
-    "size": 10536,
-    "uploadedAt": "2026-04-19T14:02:19.252Z",
-    "verified": 0,
-    "integrity": "✓ Valid"
-  },
-  "758a7acca4a5d89fbe44bc454686116bdb7cacb7ed8cee1ebb84b9728bfd9bed": {
-    "fileHash": "758a7acca4a5d89fbe44bc454686116bdb7cacb7ed8cee1ebb84b9728bfd9bed",
-    "filename": "Cognizant Industry Level Themes document.pdf",
-    "size": 329028,
-    "uploadedAt": "2026-04-19T14:01:01.047Z",
-    "verified": 0,
-    "integrity": "✓ Valid"
-  },
-  "c79dee2dfde53cbfc261e3c0e7591bea51b923795578f5c5995ea63d7626b55b": {
-    "fileHash": "c79dee2dfde53cbfc261e3c0e7591bea51b923795578f5c5995ea63d7626b55b",
-    "filename": "Technoverse_Hackathon_2026_Idea_submission_template_c3341249da (1).pdf",
-    "size": 715593,
-    "uploadedAt": "2026-04-19T06:12:37.481Z",
-    "verified": 0,
-    "integrity": "✓ Valid"
-  },
-  "b263a9379db70ea6157f61e5874bd51ea77cd64d7d2cb8bf86816114c9d0d895": {
-    "fileHash": "b263a9379db70ea6157f61e5874bd51ea77cd64d7d2cb8bf86816114c9d0d895",
-    "filename": "GEN AI 8th Program (1).docx",
-    "size": 22831,
-    "uploadedAt": "2026-04-19T06:12:58.097Z",
-    "verified": 0,
-    "integrity": "✓ Valid"
-  },
-  "0c76e192d0add57a41d3ecccf71fc773ff4c2e348e9c0d4d6cafd5a73b429a05": {
-    "fileHash": "0c76e192d0add57a41d3ecccf71fc773ff4c2e348e9c0d4d6cafd5a73b429a05",
-    "filename": "sim_check.txt",
-    "size": 16,
-    "uploadedAt": "2026-04-19T06:23:35.015Z",
-    "verified": 0,
-    "integrity": "✓ Valid"
-  },
-  "78a02d0c3c4ec250885a8bf008ea570e281ee9b33a87dcb795c6aae55831c6b3": {
-    "fileHash": "78a02d0c3c4ec250885a8bf008ea570e281ee9b33a87dcb795c6aae55831c6b3",
-    "filename": "sim_check_rerun.txt",
-    "size": 22,
-    "uploadedAt": "2026-04-19T06:24:35.115Z",
-    "verified": 0,
-    "integrity": "✓ Valid"
-  },
-  "824516ca8df770dc3b97d894a838d55d82aa7db0ff62a3545053dbdbc1114bc5": {
-    "fileHash": "824516ca8df770dc3b97d894a838d55d82aa7db0ff62a3545053dbdbc1114bc5",
-    "filename": "ARCH_3_DATASET_PREPARATION.md",
-    "size": 34380,
-    "uploadedAt": "2026-04-19T06:25:36.860Z",
-    "verified": 1,
-    "integrity": "✓ Valid"
-  },
   "6b9b72861ec635d5fbd8accd1b6bc8f8a121ec170b4f02891992a5212c48f5c6": {
     "fileHash": "6b9b72861ec635d5fbd8accd1b6bc8f8a121ec170b4f02891992a5212c48f5c6",
     "filename": "hardhat_upload_test.txt",
@@ -111,12 +15,28 @@
     "verified": 0,
     "integrity": "✓ Valid"
   },
-  "4c9d5f374ee2fd8fb7ce428a3642c7c986c5da2747310a3d17c591c5f58c0269": {
-    "fileHash": "4c9d5f374ee2fd8fb7ce428a3642c7c986c5da2747310a3d17c591c5f58c0269",
-    "filename": "full_smoke_test.txt",
-    "size": 31,
-    "uploadedAt": "2026-04-19T13:37:21.748Z",
+  "8c2c7a8d0bd002bcff8f2247f3e46e535c5350598cde61d124570ffdde4dfcfa": {
+    "fileHash": "8c2c7a8d0bd002bcff8f2247f3e46e535c5350598cde61d124570ffdde4dfcfa",
+    "filename": "Adobe_Scan_Feb_18_2023_3 (1).pdf",
+    "size": 469954,
+    "uploadedAt": "2026-04-21T10:45:02.418Z",
     "verified": 1,
+    "integrity": "✓ Valid"
+  },
+  "d09e1e405f60a5c603c1f6e368d7d16eae38417459d2877c6302572e124f48cd": {
+    "fileHash": "d09e1e405f60a5c603c1f6e368d7d16eae38417459d2877c6302572e124f48cd",
+    "filename": "1.1-Frontsheets-without-arabicnumber.docx",
+    "size": 298720,
+    "uploadedAt": "2026-04-21T10:45:23.253Z",
+    "verified": 0,
+    "integrity": "✓ Valid"
+  },
+  "eef803f0d77133b123326d8c1d1978f329f196c8b29480952c44684d60df08b3": {
+    "fileHash": "eef803f0d77133b123326d8c1d1978f329f196c8b29480952c44684d60df08b3",
+    "filename": "GEN AI 9th Program (1).docx",
+    "size": 28644,
+    "uploadedAt": "2026-04-21T10:45:30.929Z",
+    "verified": 0,
     "integrity": "✓ Valid"
   }
 }

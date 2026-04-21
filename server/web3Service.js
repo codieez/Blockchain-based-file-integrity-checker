@@ -214,6 +214,18 @@ export class Web3Service {
     }
   }
 
+  async getBlockHeaders(blockNumbers) {
+    const headers = await Promise.all(
+      blockNumbers.map(n => this.provider.send('eth_getBlockByNumber', [ethers.toQuantity(n), false]))
+    );
+
+    return new Map(
+      headers
+        .filter(Boolean)
+        .map(header => [Number(header.number), header])
+    );
+  }
+
   async getChainSnapshot(maxBlocks = 30) {
     if (!(await this.ensureReady())) {
       throw new Error(this.lastError || 'Web3 service unavailable');
@@ -224,7 +236,10 @@ export class Web3Service {
     const blockNumbers = [];
     for (let i = start; i <= latest; i++) blockNumbers.push(i);
 
-    const blocks = await Promise.all(blockNumbers.map(n => this.provider.getBlock(n, true)));
+    const [blocks, blockHeaders] = await Promise.all([
+      Promise.all(blockNumbers.map(n => this.provider.getBlock(n, true))),
+      this.getBlockHeaders(blockNumbers)
+    ]);
 
     const chain = blocks.map((block, idx) => {
       const contractTxs = (block.transactions || [])
@@ -238,12 +253,14 @@ export class Web3Service {
         transactions: contractTxs
       }).length;
 
+      const header = blockHeaders.get(Number(block.number));
+
       return {
         index: Number(block.number),
         timestamp: Number(block.timestamp) * 1000,
         hash: block.hash,
         previousHash: block.parentHash,
-        merkleRoot: block.transactionsRoot,
+        merkleRoot: header?.transactionsRoot || null,
         difficulty: Number(block.difficulty || 0),
         transactionCount: contractTxs.length,
         blockSize,
@@ -335,7 +352,10 @@ export class Web3Service {
       throw new Error(this.lastError || 'Web3 service unavailable');
     }
 
-    const block = await this.provider.getBlock(Number(blockIndex), true);
+    const [block, blockHeader] = await Promise.all([
+      this.provider.getBlock(Number(blockIndex), true),
+      this.provider.send('eth_getBlockByNumber', [ethers.toQuantity(Number(blockIndex)), false])
+    ]);
     if (!block) return null;
 
     const transactions = (block.transactions || [])
@@ -359,7 +379,7 @@ export class Web3Service {
       timestamp: Number(block.timestamp) * 1000,
       hash: block.hash,
       previousHash: block.parentHash,
-      merkleRoot: block.transactionsRoot,
+      merkleRoot: blockHeader?.transactionsRoot || null,
       difficulty: Number(block.difficulty || 0),
       nonce: Number(block.nonce || 0),
       transactions,
