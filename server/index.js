@@ -256,6 +256,42 @@ app.get('/api/web3/status', async (req, res) => {
   }
 });
 
+// Browser-friendly RPC check endpoint (Hardhat RPC itself expects JSON-RPC POST requests).
+app.get('/api/web3/rpc-health', async (req, res) => {
+  try {
+    const status = await web3Service.getStatus();
+
+    if (!status.ready) {
+      return res.status(503).json({
+        working: false,
+        message: 'Hardhat RPC is not ready',
+        reason: status.reason || 'Unknown',
+        expectedRpcUrl: process.env.WEB3_RPC_URL || 'http://127.0.0.1:8545',
+        note: 'Opening the RPC URL in a browser uses GET, but JSON-RPC nodes expect POST with a JSON body.'
+      });
+    }
+
+    const latestBlock = await web3Service.provider.getBlockNumber();
+
+    return res.json({
+      working: true,
+      message: 'Hardhat RPC is working correctly',
+      expectedRpcUrl: process.env.WEB3_RPC_URL || 'http://127.0.0.1:8545',
+      chainId: status.chainId,
+      latestBlock,
+      contractAddress: status.contractAddress,
+      note: 'If you open the RPC URL directly in browser and see a parse error, that is expected behavior for JSON-RPC endpoints.'
+    });
+  } catch (error) {
+    console.error('RPC health error:', error);
+    return res.status(500).json({
+      working: false,
+      message: 'Failed to check Hardhat RPC health',
+      error: error.message
+    });
+  }
+});
+
 app.get('/api/web3/verify/:fileHash', async (req, res) => {
   try {
     const verification = await web3Service.verifyFileHash(req.params.fileHash);

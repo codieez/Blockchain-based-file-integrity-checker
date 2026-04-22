@@ -188,6 +188,34 @@ export class Web3Service {
     }
   }
 
+  normalizeNonce(value) {
+    if (value === null || value === undefined) {
+      return 'N/A';
+    }
+
+    try {
+      if (typeof value === 'bigint') {
+        return value.toString();
+      }
+
+      if (typeof value === 'number') {
+        return Number.isFinite(value) ? String(value) : 'N/A';
+      }
+
+      if (typeof value === 'string') {
+        if (value.startsWith('0x') || value.startsWith('0X')) {
+          return BigInt(value).toString();
+        }
+
+        return value;
+      }
+
+      return String(value);
+    } catch {
+      return 'N/A';
+    }
+  }
+
   async getMempool() {
     if (!(await this.ensureReady())) {
       return { mempoolSize: 0, transactions: [] };
@@ -264,7 +292,8 @@ export class Web3Service {
         difficulty: Number(block.difficulty || 0),
         transactionCount: contractTxs.length,
         blockSize,
-        nonce: Number(block.nonce || 0),
+        nonce: this.normalizeNonce(block.nonce ?? header?.nonce),
+        nonceHex: header?.nonce || null,
         isValid:
           idx === 0 ||
           (block.parentHash === blocks[idx - 1].hash && Number(block.number) === Number(blocks[idx - 1].number) + 1)
@@ -381,7 +410,8 @@ export class Web3Service {
       previousHash: block.parentHash,
       merkleRoot: blockHeader?.transactionsRoot || null,
       difficulty: Number(block.difficulty || 0),
-      nonce: Number(block.nonce || 0),
+      nonce: this.normalizeNonce(block.nonce ?? blockHeader?.nonce),
+      nonceHex: blockHeader?.nonce || null,
       transactions,
       miningStats: {
         miningTime,

@@ -175,7 +175,7 @@ function FileVerification() {
               <>
                 <FaTimesCircle className="text-red-400 text-4xl mt-1 flex-shrink-0" />
                 <div className="flex-1">
-                  <h3 className="text-3xl font-bold text-red-300 mb-2">File Not Registered</h3>
+                  <h3 className="text-3xl font-bold text-red-300 mb-2">File Not Found in Database or Possibly Tampered</h3>
                   <p className="text-gray-300 leading-relaxed">{result.message}</p>
                 </div>
               </>
@@ -198,7 +198,7 @@ function FileVerification() {
               <div className="flex items-center justify-between">
                 <p className="text-gray-300">2. Lookup hash in reference database</p>
                 <span className={`font-semibold ${result.hashComparison?.foundInDatabase ? 'text-green-300' : 'text-red-300'}`}>
-                  {result.hashComparison?.foundInDatabase ? 'Found' : 'Not Found'}
+                  {result.hashComparison?.foundInDatabase ? 'Found' : 'Not Found in Database or Possibly Tampered'}
                 </span>
               </div>
 
@@ -211,7 +211,7 @@ function FileVerification() {
 
               <div className="rounded-lg bg-slate-800/60 p-3 border border-slate-700/60">
                 <p className="text-gray-400 text-xs mb-1">Reference File Hash</p>
-                <p className="font-mono text-amber-300 break-all">{result.hashComparison?.originalHash || 'Not available (no matching file in database)'}</p>
+                <p className="font-mono text-amber-300 break-all">{result.hashComparison?.originalHash || 'Not available (file not found in database or possibly tampered)'}</p>
                 {result.hashComparison?.originalHash && (
                   <p className="text-gray-500 text-xs mt-2">Short: {shortHash(result.hashComparison.originalHash)}</p>
                 )}

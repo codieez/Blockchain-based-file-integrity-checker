@@ -48,12 +48,20 @@ This project is a full-stack app where an admin registers reference files and us
 
 - Node.js 18+
 - npm
+- jq (optional, for pretty JSON output in curl checks)
 
 ### Install Dependencies
 
 ```bash
 npm install
 cd client && npm install && cd ..
+```
+
+Alternative:
+
+```bash
+npm install
+npm --prefix client install
 ```
 
 ### Configure Environment
@@ -77,6 +85,56 @@ npm run chain:node
 npm run chain:deploy:local:enable
 ```
 
+### Exact Local Run Steps (Verified)
+
+These are the exact steps validated in this repository.
+
+1. Open terminal A (project root):
+
+```bash
+npm install
+npm --prefix client install
+cp -n .env.example .env
+```
+
+2. In terminal B (keep running):
+
+```bash
+npm run chain:node
+```
+
+3. In terminal C:
+
+```bash
+npm run chain:deploy:local:enable
+```
+
+4. In terminal D (keep running):
+
+```bash
+npm run server
+```
+
+5. In terminal E (keep running):
+
+```bash
+npm run client
+```
+
+6. Verify health and nonce values:
+
+```bash
+curl -s http://localhost:5000/api/web3/status | jq .
+curl -s http://localhost:5000/api/web3/rpc-health | jq .
+curl -s http://localhost:5000/api/blockchain | jq '.chain[0] | {index, nonce, nonceHex, difficulty}'
+```
+
+Expected for local Hardhat auto-mining:
+
+- `ready: true` on `/api/web3/status`
+- `working: true` on `/api/web3/rpc-health`
+- `nonce: "0"` and `nonceHex: "0x0000000000000000"` are normal on local auto-mined blocks
+
 ### Run in Development
 
 ```bash
@@ -94,6 +152,7 @@ Notes:
 
 - In development, backend can run even when client/dist is missing.
 - In production-style serving from backend, build frontend first using npm run build.
+- `start.sh` starts backend and frontend only; it does not start Hardhat node or deploy contract.
 
 ### Other Useful Commands
 
@@ -127,6 +186,9 @@ npm run chain:deploy:sepolia
 
 # Alternative startup script
 chmod +x start.sh && ./start.sh
+
+# Run API demo flow
+chmod +x test-demo.sh && ./test-demo.sh
 ```
 
 ## Basic Usage
@@ -199,6 +261,7 @@ The chart highlights the core timeline: upload -> hash -> register or verify.
 ### Web3
 
 - `GET /api/web3/status`
+- `GET /api/web3/rpc-health` - Browser-friendly health check for Hardhat JSON-RPC endpoint.
 - `GET /api/web3/verify/:fileHash`
 
 ## Notes

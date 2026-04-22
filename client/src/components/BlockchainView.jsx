@@ -58,6 +58,21 @@ function BlockchainView() {
     return (bytes / Math.pow(k, i)).toFixed(2) + ' ' + sizes[i];
   };
 
+  const formatNonce = (block) => {
+    if (!block || block.nonce === null || block.nonce === undefined || block.nonce === '') {
+      return 'Unavailable';
+    }
+
+    const nonceText = String(block.nonce);
+    const isZeroHex = typeof block.nonceHex === 'string' && /^0x0+$/i.test(block.nonceHex);
+
+    if (isZeroHex) {
+      return `${nonceText} (auto-mined)`;
+    }
+
+    return nonceText;
+  };
+
   return (
     <div className="space-y-8 fade-in">
       <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-300 via-purple-300 to-pink-300 bg-clip-text text-transparent mb-6">Blockchain Status</h2>
@@ -192,7 +207,10 @@ function BlockchainView() {
                       </div>
                       <div className="p-3 rounded-lg bg-slate-800/30 border border-cyan-500/20">
                         <p className="text-gray-400 text-xs font-bold uppercase mb-2">Nonce</p>
-                        <p className="text-cyan-300 font-mono font-bold">{block.nonce}</p>
+                        <p className="text-cyan-300 font-mono font-bold">{formatNonce(block)}</p>
+                        {block.nonceHex && (
+                          <p className="text-[10px] text-cyan-500 font-mono mt-1 break-all">{block.nonceHex}</p>
+                        )}
                       </div>
                       <div className="p-3 rounded-lg bg-slate-800/30 border border-green-500/20">
                         <p className="text-gray-400 text-xs font-bold uppercase mb-2">Status</p>
